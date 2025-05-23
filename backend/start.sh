@@ -7,7 +7,7 @@ export PORT=18080
 export OPENAI_API_BASE_URL='https://api.ai-gaochao.cn/v1'
 export OPENAI_API_KEY='sk-EbmyJfdUsVcRqqFL5687643852Fc4002A9Da92D385CeA460'
 # anon2010   1234qwer
-export CORS_ALLOW_ORIGIN='http://localhost:5173;http://localhost:18080;http://localhost:12138;http://10.20.13.1:5173;http://10.20.13.1:18080;http://10.20.13.1:12138'
+export CORS_ALLOW_ORIGIN='*'
 
 
 # 访客模式配置

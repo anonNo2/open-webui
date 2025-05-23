@@ -7,7 +7,7 @@ export const APP_NAME = 'HuatuoGPT';
 // export const WEBUI_HOSTNAME = browser ? (dev ? `${location.hostname}:18080` : ``) : '';
 // export const MODE_TYPE = 'normal';
 // Guest mode
-export const WEBUI_HOSTNAME = browser ? (dev ? `${location.hostname}:12138` : ``) : '';
+export const WEBUI_HOSTNAME = browser ? (dev ? `${location.hostname}:18080` : ``) : '';
 export const MODE_TYPE = 'guest';
 
 
