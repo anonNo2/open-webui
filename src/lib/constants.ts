@@ -1,7 +1,7 @@
 import { browser, dev } from '$app/environment';
 // import { version } from '../../package.json';
 
-export const APP_NAME = 'CSEI-GPT';
+export const APP_NAME = 'SRIBD-Agents';
 
 // Normal mode
 // export const WEBUI_HOSTNAME = browser ? (dev ? `${location.hostname}:18080` : ``) : '';

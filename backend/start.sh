@@ -3,7 +3,7 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd "$SCRIPT_DIR" || exit
 export HF_ENDPOINT=https://hf-mirror.com
-export PORT=18080
+export PORT=28080
 #export PORT=12138 # for npm run dev
 export ENABLE_OPENAI_API=false
 export OPENAI_API_BASE_URL=''
@@ -14,8 +14,8 @@ export CORS_ALLOW_ORIGIN='*'
 
 export ENABLE_CODE_EXECUTION=false
 export ENABLE_CODE_INTERPRETER=false
-# export CUSTOM_NAME="CSEI-GPT"
-export WEBUI_NAME="SE-GPT"
+# export CUSTOM_NAME="SRIBD-Agents"
+export WEBUI_NAME="SRIBD-Agents"
 
 export USER_PERMISSIONS_CHAT_CONTROLS=false
 export USER_PERMISSIONS_CHAT_FILE_UPLOAD=false

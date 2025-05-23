@@ -1,6 +1,6 @@
 [project]
-name = "CSEI-GPT"
-description = "CSEI-GPT"
+name = "SRIBD-Agents"
+description = "SRIBD-Agents"
 authors = [
     { name = "Timothy Jaeryang Baek", email = "tim@openwebui.com" }
 ]

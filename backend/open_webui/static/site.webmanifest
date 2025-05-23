@@ -1,6 +1,6 @@
 {
-  "name": "CSEI-GPT",
-  "short_name": "CSEI-GPT",
+  "name": "SRIBD-Agents",
+  "short_name": "SRIBD-Agents",
   "icons": [
     {
       "src": "/static/web-app-manifest-192x192.png",
