@@ -1,0 +1,145 @@
+.campus * {
+    color: #6B5876 !important; /* 深紫色文字，柔和不刺眼 */
+    stroke: #B8A4C9 !important; /* 柔和的紫色描边 */
+}
+
+.campus .app > * {
+    background-color: #eee4f7 !important; /* 淡紫色背景，清新舒适 */
+}
+
+.campus #nav {
+    background-color: #F7F3FA; /* 浅紫白色导航栏 */
+}
+
+.campus .py-2\.5.my-auto.flex.flex-col.justify-between.h-screen {
+    background: #FFFFFF; /* 纯白色侧边栏 */
+}
+
+.campus .bg-white.dark\:bg-gray-800 {
+    background: #FFFFFF; /* 纯白色对话框背景 */
+}
+
+.campus .w-4.h-4 {
+    fill: #D4BFE9; /* 柔和的紫色图标 */
+}
+
+.campus #chat-input {
+    background: #F7F3FA; /* 浅紫白色输入框 */
+    margin: 0.3rem;
+    padding: 0.5rem;
+    border: 1px solid #E8DFF2;
+}
+
+.campus .bg-gradient-to-t.from-white.dark\:from-gray-800.from-40\%.pb-2 {
+    background: linear-gradient(to top, #eee4f7, rgba(238, 228, 247, 0.8)) !important;
+    padding-top: 0.6rem;
+}
+
+/* 按钮样式 */
+.campus .text-white.bg-gray-100.dark\:text-gray-800.dark\:bg-gray-600.disabled.transition.rounded-lg.p-1.mr-0\.5.w-7.h-7.self-center {
+    background-color: #D4BFE9; /* 柔和的紫色按钮 */
+    transition: background-color 0.2s ease-out linear;
+}
+
+.campus .bg-black.text-white.hover\:bg-gray-900.dark\:bg-white.dark\:text-black.dark\:hover\:bg-gray-100.transition.rounded-lg.p-1.mr-0\.5.w-7.h-7.self-center {
+    background-color: #B8A4C9; /* 深紫色按钮 */
+    transition: background-color 0.2s ease-out linear;
+}
+
+.campus .bg-black.text-white.hover\:bg-gray-900.dark\:bg-white.dark\:text-black.dark\:hover\:bg-gray-100.transition.rounded-lg.p-1.mr-0\.5.w-7.h-7.self-center > * {
+    fill: #FFFFFF !important;
+    transition: fill 0.2s ease-out linear;
+}
+
+/* 选中状态 */
+.campus .w-full.flex.justify-between.rounded-md.px-3.py-2.hover\:bg-gray-900.bg-gray-900.transition.whitespace-nowrap.text-ellipsis {
+    background-color: #E8DFF2; /* 浅紫色选中背景 */
+    font-weight: bold;
+}
+
+.campus .hover\:bg-gray-900:hover {
+    background-color: rgba(216, 203, 233, 0.5); /* 半透明浅紫色悬停效果 */
+}
+
+/* 消息框样式 */
+.campus .message.svelte-1nauejd {
+    color: #6B5876 !important;
+    background-color: #FFFFFF;
+    border: 1px solid #E8DFF2;
+    border-radius: 12px;
+}
+
+/* 下拉菜单 */
+.campus #dropdownDots {
+    background-color: #FFFFFF;
+    border: 1px solid #E8DFF2;
+}
+
+/* 悬停效果 */
+.campus .flex.py-2\.5.px-3\.5.w-full.hover\:bg-gray-800.transition:hover {
+    background: #F7F3FA;
+}
+
+/* 模态框 */
+.campus .m-auto.rounded-xl.max-w-full.w-\[40rem\].mx-2.bg-gray-50.dark\:bg-gray-900.shadow-3xl {
+    background-color: #FFFFFF;
+    box-shadow: 0 8px 30px rgba(184, 164, 201, 0.1);
+}
+
+/* 输入框 */
+.campus .w-full.rounded.p-4.text-sm.dark\:text-gray-300.dark\:bg-gray-800.outline-none.resize-none {
+    background-color: #F7F3FA;
+    border: 1px solid #E8DFF2;
+}
+
+/* 主题色变量 */
+.campus .svelte-1ee93ns {
+    --primary: #D4BFE9 !important; /* 柔和的紫色 */
+    --secondary: #B8A4C9 !important; /* 深紫色 */
+}
+
+.campus .svelte-11kvm4p {
+    --primary: #E8DFF2 !important; /* 浅紫色 */
+    --secondary: #eee4f7 !important; /* 淡紫色 */
+}
+
+/* 链接颜色 */
+.campus a {
+    color: #9D89B3 !important; /* 柔和的紫色链接 */
+}
+
+/* 代码块样式 */
+.campus pre {
+    background-color: #F7F3FA !important;
+    border: 1px solid #E8DFF2;
+}
+
+.campus code {
+    color: #9D89B3 !important;
+    background-color: #F7F3FA;
+}
+
+/* 滚动条样式 */
+.campus ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.campus ::-webkit-scrollbar-track {
+    background: #F7F3FA;
+}
+
+.campus ::-webkit-scrollbar-thumb {
+    background: #D4BFE9;
+    border-radius: 4px;
+}
+
+.campus ::-webkit-scrollbar-thumb:hover {
+    background: #B8A4C9;
+}
+
+/* 高亮效果 */
+.campus ::selection {
+    background: rgba(212, 191, 233, 0.3);
+    color: #6B5876;
+} 

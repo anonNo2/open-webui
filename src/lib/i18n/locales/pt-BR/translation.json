@@ -1102,6 +1102,7 @@
 	"Sign in": "Entrar",
 	"Sign in to {{WEBUI_NAME}}": "Faça login em {{WEBUI_NAME}}",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "Faça login em {{WEBUI_NAME}} com LDAP",
+	"Sign In(authenticated)": "Faça login (autenticado)",
 	"Sign Out": "Sair",
 	"Sign up": "Inscrever-se",
 	"Sign up to {{WEBUI_NAME}}": "Inscreva-se em {{WEBUI_NAME}}",

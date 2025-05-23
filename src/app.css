@@ -115,6 +115,58 @@ li p {
 	border-color: rgba(0, 0, 0, var(--tw-border-opacity));
 }
 
+/* Campus theme scrollbar styles */
+.campus ::-webkit-scrollbar-thumb {
+	background-color: #D4BFE9;
+	border-color: #E8DFF2;
+	border-radius: 4px;
+}
+
+.campus ::-webkit-scrollbar-track {
+	background-color: #F7F3FA;
+}
+
+/* Campus theme specific styles */
+.campus {
+	background: linear-gradient(180deg, #eee4f7 0%, #f2f6fb 100%);
+}
+
+.campus .bg-white {
+	background-color: #f7fafd !important;
+}
+
+.campus .dark\:bg-gray-900 {
+	background-color: #f2f6fb !important;
+}
+
+.campus .dark\:bg-gray-800 {
+	background-color: #f7fafd !important;
+}
+
+.campus .dark\:bg-gray-850 {
+	background-color: #f5f8fc !important;
+}
+
+.campus .dark\:border-gray-800 {
+	border-color: #edf1f8 !important;
+}
+
+.campus .dark\:border-gray-850 {
+	border-color: #ebeef4 !important;
+}
+
+.campus .dark\:text-gray-300 {
+	color: #6B5876 !important;
+}
+
+.campus .dark\:text-gray-400 {
+	color: #8B7996 !important;
+}
+
+.campus .dark\:text-gray-500 {
+	color: #9D89B3 !important;
+}
+
 ::-webkit-scrollbar {
 	height: 0.8rem;
 	width: 0.4rem;

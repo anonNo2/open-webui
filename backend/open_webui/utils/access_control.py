@@ -7,9 +7,7 @@ from open_webui.config import DEFAULT_USER_PERMISSIONS
 import json
 
 
-def fill_missing_permissions(
-    permissions: Dict[str, Any], default_permissions: Dict[str, Any]
-) -> Dict[str, Any]:
+def fill_missing_permissions(permissions: Dict[str, Any], default_permissions: Dict[str, Any]) -> Dict[str, Any]:
     """
     Recursively fills in missing properties in the permissions dictionary
     using the default permissions as a template.
@@ -17,9 +15,7 @@ def fill_missing_permissions(
     for key, value in default_permissions.items():
         if key not in permissions:
             permissions[key] = value
-        elif isinstance(value, dict) and isinstance(
-            permissions[key], dict
-        ):  # Both are nested dictionaries
+        elif isinstance(value, dict) and isinstance(permissions[key], dict):  # Both are nested dictionaries
             permissions[key] = fill_missing_permissions(permissions[key], value)
 
     return permissions
@@ -35,9 +31,7 @@ def get_permissions(
     Permissions are nested in a dict with the permission key as the key and a boolean as the value.
     """
 
-    def combine_permissions(
-        permissions: Dict[str, Any], group_permissions: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def combine_permissions(permissions: Dict[str, Any], group_permissions: Dict[str, Any]) -> Dict[str, Any]:
         """Combine permissions from multiple groups by taking the most permissive value."""
         for key, value in group_permissions.items():
             if isinstance(value, dict):
@@ -48,9 +42,7 @@ def get_permissions(
                 if key not in permissions:
                     permissions[key] = value
                 else:
-                    permissions[key] = (
-                        permissions[key] or value
-                    )  # Use the most permissive value (True > False)
+                    permissions[key] = permissions[key] or value  # Use the most permissive value (True > False)
         return permissions
 
     user_groups = Groups.get_groups_by_member_id(user_id)
@@ -101,9 +93,7 @@ def has_permission(
             return True
 
     # Check default permissions afterward if the group permissions don't allow it
-    default_permissions = fill_missing_permissions(
-        default_permissions, DEFAULT_USER_PERMISSIONS
-    )
+    default_permissions = fill_missing_permissions(default_permissions, DEFAULT_USER_PERMISSIONS)
     return get_permission(default_permissions, permission_hierarchy)
 
 
@@ -121,15 +111,11 @@ def has_access(
     permitted_group_ids = permission_access.get("group_ids", [])
     permitted_user_ids = permission_access.get("user_ids", [])
 
-    return user_id in permitted_user_ids or any(
-        group_id in permitted_group_ids for group_id in user_group_ids
-    )
+    return user_id in permitted_user_ids or any(group_id in permitted_group_ids for group_id in user_group_ids)
 
 
 # Get all users with access to a resource
-def get_users_with_access(
-    type: str = "write", access_control: Optional[dict] = None
-) -> List[UserModel]:
+def get_users_with_access(type: str = "write", access_control: Optional[dict] = None) -> List[UserModel]:
     if access_control is None:
         return Users.get_users()
 

@@ -220,9 +220,7 @@ class OAuthManager:
         log.debug(f"Oauth Groups claim: {oauth_claim}")
         log.debug(f"User oauth groups: {user_oauth_groups}")
         log.debug(f"User's current groups: {[g.name for g in user_current_groups]}")
-        log.debug(
-            f"All groups available in OpenWebUI: {[g.name for g in all_available_groups]}"
-        )
+        log.debug(f"All groups available in OpenWebUI: {[g.name for g in all_available_groups]}")
 
         # Remove groups that user is no longer a part of
         for group_model in user_current_groups:
@@ -232,9 +230,7 @@ class OAuthManager:
                 and group_model.name not in blocked_groups
             ):
                 # Remove group from user
-                log.debug(
-                    f"Removing user from group {group_model.name} as it is no longer in their oauth groups"
-                )
+                log.debug(f"Removing user from group {group_model.name} as it is no longer in their oauth groups")
 
                 user_ids = group_model.user_ids
                 user_ids = [i for i in user_ids if i != user.id]
@@ -250,9 +246,7 @@ class OAuthManager:
                     permissions=group_permissions,
                     user_ids=user_ids,
                 )
-                Groups.update_group_by_id(
-                    id=group_model.id, form_data=update_form, overwrite=False
-                )
+                Groups.update_group_by_id(id=group_model.id, form_data=update_form, overwrite=False)
 
         # Add user to new groups
         for group_model in all_available_groups:
@@ -263,9 +257,7 @@ class OAuthManager:
                 and group_model.name not in blocked_groups
             ):
                 # Add user to group
-                log.debug(
-                    f"Adding user to group {group_model.name} as it was found in their oauth groups"
-                )
+                log.debug(f"Adding user to group {group_model.name} as it was found in their oauth groups")
 
                 user_ids = group_model.user_ids
                 user_ids.append(user.id)
@@ -388,17 +380,11 @@ class OAuthManager:
                                 if primary_email:
                                     email = primary_email
                                 else:
-                                    log.warning(
-                                        "No primary email found in GitHub response"
-                                    )
-                                    raise HTTPException(
-                                        400, detail=ERROR_MESSAGES.INVALID_CRED
-                                    )
+                                    log.warning("No primary email found in GitHub response")
+                                    raise HTTPException(400, detail=ERROR_MESSAGES.INVALID_CRED)
                             else:
                                 log.warning("Failed to fetch GitHub email")
-                                raise HTTPException(
-                                    400, detail=ERROR_MESSAGES.INVALID_CRED
-                                )
+                                raise HTTPException(400, detail=ERROR_MESSAGES.INVALID_CRED)
                 except Exception as e:
                     log.warning(f"Error fetching GitHub email: {e}")
                     raise HTTPException(400, detail=ERROR_MESSAGES.INVALID_CRED)
@@ -410,9 +396,7 @@ class OAuthManager:
             "*" not in auth_manager_config.OAUTH_ALLOWED_DOMAINS
             and email.split("@")[-1] not in auth_manager_config.OAUTH_ALLOWED_DOMAINS
         ):
-            log.warning(
-                f"OAuth callback failed, e-mail domain is not in the list of allowed domains: {user_data}"
-            )
+            log.warning(f"OAuth callback failed, e-mail domain is not in the list of allowed domains: {user_data}")
             raise HTTPException(400, detail=ERROR_MESSAGES.INVALID_CRED)
 
         # Check if the user exists
@@ -480,9 +464,7 @@ class OAuthManager:
 
                 user = Auths.insert_new_auth(
                     email=email,
-                    password=get_password_hash(
-                        str(uuid.uuid4())
-                    ),  # Random password, not used
+                    password=get_password_hash(str(uuid.uuid4())),  # Random password, not used
                     name=name,
                     profile_image_url=picture_url,
                     role=role,
@@ -501,9 +483,7 @@ class OAuthManager:
                         },
                     )
             else:
-                raise HTTPException(
-                    status.HTTP_403_FORBIDDEN, detail=ERROR_MESSAGES.ACCESS_PROHIBITED
-                )
+                raise HTTPException(status.HTTP_403_FORBIDDEN, detail=ERROR_MESSAGES.ACCESS_PROHIBITED)
 
         jwt_token = create_token(
             data={"id": user.id},

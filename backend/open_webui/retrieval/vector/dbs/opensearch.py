@@ -187,9 +187,7 @@ class OpenSearchClient(VectorDBBase):
         return self._result_to_get_result(result)
 
     def insert(self, collection_name: str, items: list[VectorItem]):
-        self._create_index_if_not_exists(
-            collection_name=collection_name, dimension=len(items[0]["vector"])
-        )
+        self._create_index_if_not_exists(collection_name=collection_name, dimension=len(items[0]["vector"]))
 
         for batch in self._create_batches(items):
             actions = [
@@ -208,9 +206,7 @@ class OpenSearchClient(VectorDBBase):
             bulk(self.client, actions)
 
     def upsert(self, collection_name: str, items: list[VectorItem]):
-        self._create_index_if_not_exists(
-            collection_name=collection_name, dimension=len(items[0]["vector"])
-        )
+        self._create_index_if_not_exists(collection_name=collection_name, dimension=len(items[0]["vector"]))
 
         for batch in self._create_batches(items):
             actions = [

@@ -1,7 +1,24 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 	<head>
+		<!--
+		* Meta Tags Section
+		* 包含所有必要的元数据标签
+		* viewport设置确保在移动设备上正确显示
+		* theme-color用于自定义浏览器主题颜色
+		-->
 		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+		<meta name="theme-color" content="#171717" />
+		<meta name="robots" content="noindex,nofollow" />
+		<meta name="description" content="CSEI-GPT" />
+		<meta name="apple-mobile-web-app-title" content="CSEI-GPT" />
+
+		<!--
+		* Favicon Section
+		* 提供多种尺寸和格式的图标
+		* 支持现代浏览器和移动设备
+		-->
 		<link rel="icon" type="image/png" href="/static/favicon.png" />
 		<link rel="icon" type="image/png" href="/static/favicon-96x96.png" sizes="96x96" />
 		<link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
@@ -25,58 +42,86 @@
 		/>
 		<script src="/static/loader.js" defer></script>
 
+		<!--
+		* Theme Initialization Script
+		* 处理主题切换逻辑
+		* 支持系统主题、明暗模式和自定义主题
+		* 包含主题持久化存储
+		-->
 		<script>
-			function resizeIframe(obj) {
-				obj.style.height = obj.contentWindow.document.documentElement.scrollHeight + 'px';
-			}
-		</script>
-
-		<script>
-			// On page load or when changing themes, best to add inline in `head` to avoid FOUC
 			(() => {
 				const metaThemeColorTag = document.querySelector('meta[name="theme-color"]');
 				const prefersDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
+				// 主题初始化：如果没有存储的主题，默认使用系统主题
 				if (!localStorage?.theme) {
 					localStorage.theme = 'system';
 				}
 
-				if (localStorage.theme === 'system') {
-					document.documentElement.classList.add(prefersDarkTheme ? 'dark' : 'light');
-					metaThemeColorTag.setAttribute('content', prefersDarkTheme ? '#171717' : '#ffffff');
-				} else if (localStorage.theme === 'oled-dark') {
-					document.documentElement.style.setProperty('--color-gray-800', '#101010');
-					document.documentElement.style.setProperty('--color-gray-850', '#050505');
-					document.documentElement.style.setProperty('--color-gray-900', '#000000');
-					document.documentElement.style.setProperty('--color-gray-950', '#000000');
-					document.documentElement.classList.add('dark');
-					metaThemeColorTag.setAttribute('content', '#000000');
-				} else if (localStorage.theme === 'light') {
-					document.documentElement.classList.add('light');
-					metaThemeColorTag.setAttribute('content', '#ffffff');
-				} else if (localStorage.theme === 'her') {
-					document.documentElement.classList.add('dark');
-					document.documentElement.classList.add('her');
-					metaThemeColorTag.setAttribute('content', '#983724');
-				} else {
-					document.documentElement.classList.add('dark');
-					metaThemeColorTag.setAttribute('content', '#171717');
+				/**
+				 * 主题设置函数
+				 * @param {string} theme - 主题名称：'system'|'oled-dark'|'light'|'her'|'campus'
+				 */
+				function setTheme(theme) {
+					// 移除所有主题类
+					document.documentElement.classList.remove('dark', 'light', 'her', 'campus');
+					
+					switch (theme) {
+						case 'system':
+							// 根据系统偏好设置主题
+							document.documentElement.classList.add(prefersDarkTheme ? 'dark' : 'light');
+							metaThemeColorTag.setAttribute('content', prefersDarkTheme ? '#171717' : '#ffffff');
+							break;
+						case 'oled-dark':
+							// OLED深色主题：更深的黑色
+							document.documentElement.style.setProperty('--color-gray-800', '#101010');
+							document.documentElement.style.setProperty('--color-gray-850', '#050505');
+							document.documentElement.style.setProperty('--color-gray-900', '#000000');
+							document.documentElement.style.setProperty('--color-gray-950', '#000000');
+							document.documentElement.classList.add('dark');
+							metaThemeColorTag.setAttribute('content', '#000000');
+							break;
+						case 'light':
+							// 浅色主题
+							document.documentElement.classList.add('light');
+							metaThemeColorTag.setAttribute('content', '#ffffff');
+							break;
+						case 'her':
+							// 自定义主题
+							document.documentElement.classList.add('dark', 'her');
+							metaThemeColorTag.setAttribute('content', '#983724');
+							break;
+						case 'campus':
+							// Campus主题
+							document.documentElement.style.setProperty('--color-gray-800', '#F7F3FA');
+							document.documentElement.style.setProperty('--color-gray-850', '#E8DFF2');
+							document.documentElement.style.setProperty('--color-gray-900', '#eee4f7');
+							document.documentElement.style.setProperty('--color-gray-950', '#D4BFE9');
+							document.documentElement.classList.add('campus');
+							metaThemeColorTag.setAttribute('content', '#eee4f7');
+							break;
+						default:
+							// 默认深色主题
+							document.documentElement.classList.add('dark');
+							metaThemeColorTag.setAttribute('content', '#171717');
+					}
 				}
 
+				// 初始设置主题
+				setTheme(localStorage.theme);
+
+				// 监听系统主题变化
 				window.matchMedia('(prefers-color-scheme: dark)').addListener((e) => {
 					if (localStorage.theme === 'system') {
-						if (e.matches) {
-							document.documentElement.classList.add('dark');
-							document.documentElement.classList.remove('light');
-							metaThemeColorTag.setAttribute('content', '#171717');
-						} else {
-							document.documentElement.classList.add('light');
-							document.documentElement.classList.remove('dark');
-							metaThemeColorTag.setAttribute('content', '#ffffff');
-						}
+						setTheme('system');
 					}
 				});
 
+				/**
+				 * Logo处理函数
+				 * 根据主题切换Logo样式
+				 * 支持深色模式特殊处理
+				 */
 				function setSplashImage() {
 					const logo = document.getElementById('logo');
 					const isDarkMode = document.documentElement.classList.contains('dark');
@@ -84,106 +129,362 @@
 					if (isDarkMode) {
 						const darkImage = new Image();
 						darkImage.src = '/static/splash-dark.png';
-
+						// 成功加载深色版Logo
 						darkImage.onload = () => {
 							logo.src = '/static/splash-dark.png';
-							logo.style.filter = ''; // Ensure no inversion is applied if splash-dark.png exists
+							logo.style.filter = '';
 						};
-
+						// 深色版Logo加载失败时反转颜色
 						darkImage.onerror = () => {
-							logo.style.filter = 'invert(1)'; // Invert image if splash-dark.png is missing
+							logo.style.filter = 'invert(1)';
 						};
 					}
 				}
 
-				// Runs after classes are assigned
 				window.onload = setSplashImage;
 			})();
 		</script>
 
-		<title>Open WebUI</title>
-
+		<title>CSEI-GPT</title>
 		%sveltekit.head%
+
+		<!-- 全局样式 -->
+		<style type="text/css" nonce="">
+			html {
+				overflow-y: hidden !important;
+			}
+
+			body {
+				margin: 0;
+				padding: 0;
+			}
+		</style>
 	</head>
 
 	<body data-sveltekit-preload-data="hover">
+		<!-- 主内容区域 -->
 		<div style="display: contents">%sveltekit.body%</div>
 
-		<div
-			id="splash-screen"
-			style="position: fixed; z-index: 100; top: 0; left: 0; width: 100%; height: 100%"
-		>
-			<style type="text/css" nonce="">
-				html {
-					overflow-y: scroll !important;
-				}
-			</style>
+		<!--
+		* Splash Screen Section
+		* 包含背景幻灯片、加载动画和Logo
+		* 使用多层级结构实现视觉效果
+		-->
+		<div id="splash-screen" class="splash-screen">
+			<!-- 背景幻灯片容器 -->
+			<div id="background-slideshow"></div>
 
-			<img
-				id="logo"
-				style="
-					position: absolute;
-					width: auto;
-					height: 6rem;
-					top: 44%;
-					left: 50%;
-					transform: translateX(-50%);
-				"
-				src="/static/splash.png"
-			/>
-
-			<div
-				style="
-					position: absolute;
-					top: 33%;
-					left: 50%;
-
-					width: 24rem;
-					transform: translateX(-50%);
-
-					display: flex;
-					flex-direction: column;
-					align-items: center;
-				"
-			>
-				<img
-					id="logo-her"
-					style="width: auto; height: 13rem"
-					src="/static/splash.png"
-					class="animate-pulse-fast"
-				/>
-
-				<div style="position: relative; width: 24rem; margin-top: 0.5rem">
-					<div
-						id="progress-background"
-						style="
-							position: absolute;
-							width: 100%;
-							height: 0.75rem;
-
-							border-radius: 9999px;
-							background-color: #fafafa9a;
-						"
-					></div>
-
-					<div
-						id="progress-bar"
-						style="
-							position: absolute;
-							width: 0%;
-							height: 0.75rem;
-							border-radius: 9999px;
-							background-color: #fff;
-						"
-						class="bg-white"
-					></div>
+			<!-- 加载动画容器 -->
+			<div class="loading-container">
+				<!-- Logo和粒子效果容器 -->
+				<div class="logo-container">
+					<canvas id="particle-canvas"></canvas>
+					<img id="logo" class="main-logo" src="/static/splash.png" alt="CSEI-GPT Logo" />
 				</div>
 			</div>
-
-			<!-- <span style="position: absolute; bottom: 32px; left: 50%; margin: -36px 0 0 -36px">
-				Footer content
-			</span> -->
 		</div>
+
+		<!--
+		* Splash Screen Styles
+		* 定义所有加载页面相关样式
+		* 包含响应式设计
+		-->
+		<style type="text/css" nonce="">
+			/* 基础样式 */
+			.splash-screen {
+				position: fixed;
+				z-index: 100;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: #fff;
+			}
+
+			/* 主题变体样式 */
+			html.dark .splash-screen {
+				background: #000;
+			}
+
+			html.her .splash-screen {
+				background: #983724;
+			}
+
+			/* Logo容器样式 */
+			.logo-container {
+				position: relative;
+				width: 200px;
+				height: 200px;
+				margin: 0 auto;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+
+			/* Logo图片样式 */
+			.main-logo {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				z-index: 2;
+				width: 120px;
+				height: 120px;
+				transition: all 0.3s ease;
+			}
+
+			/* 粒子动画画布样式 */
+			#particle-canvas {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				z-index: 1;
+			}
+
+			/* 幻灯片样式 */
+			#background-slideshow {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				z-index: -1;
+				overflow: hidden;
+			}
+
+			/* 幻灯片图片样式 */
+			.slideshow-image {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background-size: cover;
+				background-position: center;
+				opacity: 0;
+				/* 图片淡入动画：1秒 */
+				transition: opacity 1s ease-in-out;
+				transform-origin: center center;
+			}
+
+			.slideshow-image.active {
+				opacity: 1;
+			}
+
+			/* 图片缩放动画 */
+			.slideshow-image.zoom-effect {
+				/* 放大动画：8秒 */
+				transition: all 8s ease-out;
+				/* 放大比例：1.3倍 */
+				transform: scale(1.3);
+			}
+
+			/* 加载容器样式 */
+			.loading-container {
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				z-index: 1;
+				background: rgba(0, 0, 0, 0.5);
+				backdrop-filter: blur(10px);
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+
+			/* 主题特定样式 */
+			html.dark .loading-container {
+				background: rgba(0, 0, 0, 0.7);
+			}
+
+			html.her .loading-container {
+				background: rgba(152, 55, 36, 0.7);
+			}
+
+			/* 响应式样式 */
+			@media (max-width: 640px) {
+				.logo-container {
+					width: 150px;
+					height: 150px;
+				}
+
+				.main-logo {
+					width: 80px;
+					height: 80px;
+				}
+			}
+		</style>
+
+		<!--
+		* Particle Animation Script
+		* 创建围绕Logo的粒子动画效果
+		* 支持响应式调整
+		-->
+		<script>
+			(() => {
+				const canvas = document.getElementById('particle-canvas');
+				const ctx = canvas.getContext('2d');
+				const particles = [];
+
+				/**
+				 * 设置画布尺寸
+				 * 根据容器大小自动调整
+				 */
+				function setCanvasSize() {
+					canvas.width = canvas.offsetWidth;
+					canvas.height = canvas.offsetHeight;
+				}
+				setCanvasSize();
+				window.addEventListener('resize', setCanvasSize);
+				
+				// 创建粒子
+				for(let i = 0; i < 50; i++) {
+					particles.push({
+						x: canvas.width/2,
+						y: canvas.height/2,
+						angle: (Math.PI * 2 / 50) * i,
+						radius: 80,
+						size: 2,
+						speed: 0.02
+					});
+				}
+				
+				/**
+				 * 动画循环函数
+				 * 更新并绘制所有粒子
+				 */
+				function animate() {
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					
+					particles.forEach(particle => {
+						// 更新粒子位置
+						particle.angle += particle.speed;
+						particle.x = canvas.width/2 + Math.cos(particle.angle) * particle.radius;
+						particle.y = canvas.height/2 + Math.sin(particle.angle) * particle.radius;
+						
+						// 绘制粒子
+						ctx.beginPath();
+						ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+						ctx.fillStyle = '#ffffff';
+						ctx.fill();
+					});
+					
+					requestAnimationFrame(animate);
+				}
+				
+				animate();
+			})();
+		</script>
+
+		<!--
+		* Slideshow Script
+		* 实现背景图片轮播效果
+		* 包含预加载、随机切换和动画效果
+		-->
+		<script>
+			(() => {
+				// 背景图片URL数组
+				const imageUrls = [
+					'/assets/images/banner1.png',
+					'/assets/images/banner2.png',
+					'/assets/images/banner3.png'
+					
+				];
+				
+				// 随机选择初始图片
+				let currentImageIndex = Math.floor(Math.random() * imageUrls.length);
+				const slideshow = document.getElementById('background-slideshow');
+				
+				/**
+				 * 生成随机焦点位置
+				 * @returns {{x: number, y: number}} 返回30%-70%范围内的随机位置
+				 */
+				function getRandomPosition() {
+					return {
+						x: 30 + Math.random() * 40,
+						y: 30 + Math.random() * 40
+					};
+				}
+
+				// 预加载所有图片
+				const preloadImages = imageUrls.map(url => {
+					const img = new Image();
+					img.src = url;
+					return img;
+				});
+
+				// 创建幻灯片元素
+				imageUrls.forEach((url, index) => {
+					const div = document.createElement('div');
+					div.className = 'slideshow-image';
+					div.style.backgroundImage = `url(${url})`;
+					
+					// 设置初始活动图片
+					if (index === currentImageIndex) {
+						div.classList.add('active');
+						const pos = getRandomPosition();
+						div.style.transformOrigin = `${pos.x}% ${pos.y}%`;
+						// 延迟200ms开始放大动画
+						setTimeout(() => {
+							div.classList.add('zoom-effect');
+						}, 200);
+					}
+					
+					slideshow.appendChild(div);
+				});
+
+				/**
+				 * 开始幻灯片播放
+				 * 每10秒切换一次图片
+				 */
+				function startSlideshow() {
+					setInterval(() => {
+						const images = document.querySelectorAll('.slideshow-image');
+						
+						// 移除当前图片效果
+						images[currentImageIndex].classList.remove('active', 'zoom-effect');
+						
+						// 随机选择下一张图片（避免重复）
+						let nextIndex;
+						do {
+							nextIndex = Math.floor(Math.random() * images.length);
+						} while (nextIndex === currentImageIndex);
+						
+						currentImageIndex = nextIndex;
+						
+						// 设置新图片效果
+						const pos = getRandomPosition();
+						const nextImage = images[currentImageIndex];
+						nextImage.style.transform = 'scale(1)';
+						nextImage.style.transformOrigin = `${pos.x}% ${pos.y}%`;
+						nextImage.classList.add('active');
+						
+						// 延迟500ms开始放大动画
+						setTimeout(() => {
+							nextImage.classList.add('zoom-effect');
+						}, 500);
+						
+					}, 10000); // 每10秒切换一次
+				}
+
+				// 当所有图片加载完成后开始播放
+				Promise.all(preloadImages.map(img => {
+					return new Promise((resolve) => {
+						if (img.complete) {
+							resolve();
+						} else {
+							img.onload = resolve;
+						}
+					});
+				})).then(() => {
+					startSlideshow();
+				});
+			})();
+		</script>
 	</body>
 </html>
 

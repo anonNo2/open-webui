@@ -81,11 +81,13 @@
 
 	export let selectedToolIds = [];
 	export let selectedFilterIds = [];
-
+	// MARK 添加TAG
 	export let imageGenerationEnabled = false;
 	export let webSearchEnabled = false;
 	export let codeInterpreterEnabled = false;
-
+	export let knowledgeBaseEnabled = false;
+	export let deepWebSearchEnabled = false;
+	export let deepResearchEnabled = false;
 	$: onChange({
 		prompt,
 		files: files.filter((file) => file.type !== 'image'),
@@ -93,6 +95,10 @@
 		selectedFilterIds,
 		imageGenerationEnabled,
 		webSearchEnabled,
+		codeInterpreterEnabled,
+		knowledgeBaseEnabled,
+		deepWebSearchEnabled,
+		deepResearchEnabled,
 		codeInterpreterEnabled
 	});
 
@@ -427,39 +433,170 @@
 						</div>
 					{/if}
 				</div>
-
+				<!-- MARK 添加TAG -->
 				<div class="w-full relative">
-					{#if atSelectedModel !== undefined}
+					{#if atSelectedModel !== undefined || selectedToolIds.length > 0 || webSearchEnabled || ($settings?.webSearch ?? false) === 'always' || imageGenerationEnabled || codeInterpreterEnabled || knowledgeBaseEnabled || deepWebSearchEnabled || deepResearchEnabled}
 						<div
 							class="px-3 pb-0.5 pt-1.5 text-left w-full flex flex-col absolute bottom-0 left-0 right-0 bg-linear-to-t from-white dark:from-gray-900 z-10"
 						>
-							<div class="flex items-center justify-between w-full">
-								<div class="pl-[1px] flex items-center gap-2 text-sm dark:text-gray-500">
-									<img
-										crossorigin="anonymous"
-										alt="model profile"
-										class="size-3.5 max-w-[28px] object-cover rounded-full"
-										src={$models.find((model) => model.id === atSelectedModel.id)?.info?.meta
-											?.profile_image_url ??
-											($i18n.language === 'dg-DG'
-												? `/doge.png`
-												: `${WEBUI_BASE_URL}/static/favicon.png`)}
-									/>
-									<div class="translate-y-[0.5px]">
-										Talking to <span class=" font-medium">{atSelectedModel.name}</span>
+							{#if selectedToolIds.length > 0}
+								<div class="flex items-center justify-between w-full">
+									<div class="flex items-center gap-2.5 text-sm dark:text-gray-500">
+										<div class="pl-1">
+											<span class="relative flex size-2">
+												<span
+													class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"
+												/>
+												<span class="relative inline-flex rounded-full size-2 bg-yellow-500" />
+											</span>
+										</div>
+										<div class="  text-ellipsis line-clamp-1 flex">
+											{#each selectedToolIds.map((id) => {
+												return $tools ? $tools.find((t) => t.id === id) : { id: id, name: id };
+											}) as tool, toolIdx (toolIdx)}
+												<Tooltip
+													content={tool?.meta?.description ?? ''}
+													className=" {toolIdx !== 0 ? 'pl-0.5' : ''} shrink-0"
+													placement="top"
+												>
+													{tool.name}
+												</Tooltip>
+
+												{#if toolIdx !== selectedToolIds.length - 1}
+													<span>, </span>
+												{/if}
+											{/each}
+										</div>
 									</div>
 								</div>
-								<div>
-									<button
-										class="flex items-center dark:text-gray-500"
-										on:click={() => {
-											atSelectedModel = undefined;
-										}}
-									>
-										<XMark />
-									</button>
+							{/if}
+
+							{#if webSearchEnabled || ($config?.features?.enable_web_search && ($settings?.webSearch ?? false)) === 'always'}
+								<div class="flex items-center justify-between w-full">
+									<div class="flex items-center gap-2.5 text-sm dark:text-gray-500">
+										<div class="pl-1">
+											<span class="relative flex size-2">
+												<span
+													class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"
+												/>
+												<span class="relative inline-flex rounded-full size-2 bg-blue-500" />
+											</span>
+										</div>
+										<div class=" translate-y-[0.5px]">{$i18n.t('Search the internet')}</div>
+									</div>
 								</div>
-							</div>
+							{/if}
+
+							{#if imageGenerationEnabled}
+								<div class="flex items-center justify-between w-full">
+									<div class="flex items-center gap-2.5 text-sm dark:text-gray-500">
+										<div class="pl-1">
+											<span class="relative flex size-2">
+												<span
+													class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"
+												/>
+												<span class="relative inline-flex rounded-full size-2 bg-teal-500" />
+											</span>
+										</div>
+										<div class=" translate-y-[0.5px]">{$i18n.t('Generate an image')}</div>
+									</div>
+								</div>
+							{/if}
+
+							{#if codeInterpreterEnabled}
+								<div class="flex items-center justify-between w-full">
+									<div class="flex items-center gap-2.5 text-sm dark:text-gray-500">
+										<div class="pl-1">
+											<span class="relative flex size-2">
+												<span
+													class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
+												/>
+												<span class="relative inline-flex rounded-full size-2 bg-green-500" />
+											</span>
+										</div>
+										<div class=" translate-y-[0.5px]">{$i18n.t('Execute code for analysis')}</div>
+									</div>
+								</div>
+							{/if}
+
+							{#if knowledgeBaseEnabled}
+								<div class="flex items-center justify-between w-full">
+									<div class="flex items-center gap-2.5 text-sm dark:text-gray-500">
+										<div class="pl-1">
+											<span class="relative flex size-2">
+												<span
+													class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"
+												/>
+												<span class="relative inline-flex rounded-full size-2 bg-purple-500" />
+											</span>
+										</div>
+										<div class=" translate-y-[0.5px]">{$i18n.t('Search knowledge base')}</div>
+									</div>
+								</div>
+							{/if}
+
+							{#if deepWebSearchEnabled}
+								<div class="flex items-center justify-between w-full">
+									<div class="flex items-center gap-2.5 text-sm dark:text-gray-500">
+										<div class="pl-1">
+											<span class="relative flex size-2">
+												<span
+													class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"
+												/>
+												<span class="relative inline-flex rounded-full size-2 bg-blue-500" />
+											</span>
+										</div>
+										<div class=" translate-y-[0.5px]">{$i18n.t('Search the deep web')}</div>
+									</div>
+								</div>
+							{/if}
+
+							<!-- MARK 添加TAG -->
+							{#if deepResearchEnabled}
+								<div class="flex items-center justify-between w-full">
+									<div class="flex items-center gap-2.5 text-sm dark:text-gray-500">
+										<div class="pl-1">
+											<span class="relative flex size-2">
+												<span 
+													class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
+												/>
+												<span class="relative inline-flex rounded-full size-2 bg-green-500" />
+											</span>
+										</div>
+										<div class=" translate-y-[0.5px]">{$i18n.t('Deep Research Mode')}</div>
+									</div>
+								</div>
+							{/if}
+
+							{#if atSelectedModel !== undefined}
+								<div class="flex items-center justify-between w-full">
+									<div class="pl-[1px] flex items-center gap-2 text-sm dark:text-gray-500">
+										<img
+											crossorigin="anonymous"
+											alt="model profile"
+											class="size-3.5 max-w-[28px] object-cover rounded-full"
+											src={$models.find((model) => model.id === atSelectedModel.id)?.info?.meta
+												?.profile_image_url ??
+												($i18n.language === 'dg-DG'
+													? `/doge.png`
+													: `${WEBUI_BASE_URL}/static/favicon.png`)}
+										/>
+										<div class="translate-y-[0.5px]">
+											Talking to <span class=" font-medium">{atSelectedModel.name}</span>
+										</div>
+									</div>
+									<div>
+										<button
+											class="flex items-center dark:text-gray-500"
+											on:click={() => {
+												atSelectedModel = undefined;
+											}}
+										>
+											<XMark />
+										</button>
+									</div>
+								</div>
+							{/if}
 						</div>
 					{/if}
 
@@ -638,7 +775,7 @@
 									</div>
 								{/if}
 
-								<div class="px-2.5">
+								<div class="px-2.5 min-h-[80px]">
 									{#if $settings?.richTextInput ?? true}
 										<div
 											class="scrollbar-hidden rtl:text-right ltr:text-left bg-transparent dark:text-gray-100 outline-hidden w-full pt-3 px-1 resize-none h-fit max-h-80 overflow-auto"
@@ -1284,9 +1421,102 @@
 														</button>
 													</Tooltip>
 												{/if}
+												<!-- MARK调试 -->
+												{#if $config?.features?.enable_knowledge_base && ($_user.role === 'admin' || $_user?.permissions?.features?.knowledge_base)}
+												<!-- {#if true} -->
+													<Tooltip content={$i18n.t('Search knowledge base')} placement="top">
+														<button
+															on:click|preventDefault={() =>
+																(knowledgeBaseEnabled = !knowledgeBaseEnabled)}
+															type="button"
+															class="px-1.5 @sm:px-2.5 py-1.5 flex gap-1.5 items-center text-sm rounded-full font-medium transition-colors duration-300 focus:outline-hidden max-w-full overflow-hidden {knowledgeBaseEnabled
+																? 'bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400'
+																: 'bg-transparent text-gray-600 dark:text-gray-300 border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 '}"
+														>
+															<svg
+																xmlns="http://www.w3.org/2000/svg"
+																viewBox="0 0 24 24"
+																fill="none"
+																stroke="currentColor"
+																stroke-width="1.75"
+																class="size-5"
+															>
+																<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+															</svg>
+															<span
+																class="hidden @sm:block whitespace-nowrap overflow-hidden text-ellipsis translate-y-[0.5px] mr-0.5"
+																>{$i18n.t('Knowledge Base')}</span
+															>
+														</button>
+													</Tooltip>
+												{/if}
+
+												<!-- MARK 添加TAG -->
+												{#if $config?.features?.enable_deep_web_search && ($_user.role === 'admin' || $_user?.permissions?.features?.deep_web_search)}
+													<Tooltip content={$i18n.t('Search the deep web')} placement="top">
+														<button
+															on:click|preventDefault={() =>
+																(deepWebSearchEnabled = !deepWebSearchEnabled)}
+															type="button"
+															class="px-1.5 @sm:px-2.5 py-1.5 flex gap-1.5 items-center text-sm rounded-full font-medium transition-colors duration-300 focus:outline-hidden max-w-full overflow-hidden {deepWebSearchEnabled
+																? 'bg-blue-100 dark:bg-blue-500/20 text-blue-500 dark:text-blue-400'
+																: 'bg-transparent text-gray-600 dark:text-gray-300 border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 '}"
+														>
+															<svg
+																xmlns="http://www.w3.org/2000/svg"
+																viewBox="0 0 24 24"
+																fill="none"
+																stroke="currentColor"
+																stroke-width="1.75"
+																class="size-5"
+															>
+																<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" />
+																<path stroke-linecap="round" stroke-linejoin="round" d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z" />
+															</svg>
+															<span
+																class="hidden @sm:block whitespace-nowrap overflow-hidden text-ellipsis translate-y-[0.5px] mr-0.5"
+																>{$i18n.t('Deep Web Search')}</span
+															>
+														</button>
+													</Tooltip>
+												{/if}	
+												<!-- MARK 添加TAG -->
+												{#if $config?.features?.enable_deep_research && ($_user.role === 'admin' || $_user?.permissions?.features?.deep_research)}
+													<Tooltip content={$i18n.t('Deep Research Mode')} placement="top">
+														<button
+															on:click|preventDefault={() =>
+																(deepResearchEnabled = !deepResearchEnabled)}
+															type="button"
+															class="px-1.5 @sm:px-2.5 py-1.5 flex gap-1.5 items-center text-sm rounded-full font-medium transition-colors duration-300 focus:outline-hidden max-w-full overflow-hidden {deepResearchEnabled
+																? 'bg-green-100 dark:bg-green-500/20 text-green-500 dark:text-green-400'
+																: 'bg-transparent text-gray-600 dark:text-gray-300 border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 '}"
+														>
+															<svg
+																xmlns="http://www.w3.org/2000/svg" 
+																viewBox="0 0 24 24"
+																fill="none"
+																stroke="currentColor"
+																stroke-width="1.75"
+																class="size-5"
+															>
+																<path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+																<path stroke-linecap="round" stroke-linejoin="round" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+																<path stroke-linecap="round" stroke-linejoin="round" d="M15 13c-.13 0-.26-.05-.35-.15-.19-.19-.19-.51 0-.7l1.79-1.79c.19-.19.51-.19.7 0 .19.19.19.51 0 .7l-1.79 1.79c-.09.1-.22.15-.35.15z"/>
+															</svg>
+															<span
+																class="hidden @sm:block whitespace-nowrap overflow-hidden text-ellipsis translate-y-[0.5px] mr-0.5"
+																>{$i18n.t('Deep Research')}</span
+															>
+														</button>
+													</Tooltip>
+												{/if}
 											{/if}
+
+
+											
 										</div>
 									</div>
+									
 
 									<div class="self-end flex space-x-1 mr-1 shrink-0">
 										{#if (!history?.currentId || history.messages[history.currentId]?.done == true) && ($_user?.role === 'admin' || ($_user?.permissions?.chat?.stt ?? true))}

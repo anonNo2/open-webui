@@ -44,9 +44,7 @@ async def get_prompt_list(user=Depends(get_verified_user)):
 
 
 @router.post("/create", response_model=Optional[PromptModel])
-async def create_new_prompt(
-    request: Request, form_data: PromptForm, user=Depends(get_verified_user)
-):
+async def create_new_prompt(request: Request, form_data: PromptForm, user=Depends(get_verified_user)):
     if user.role != "admin" and not has_permission(
         user.id, "workspace.prompts", request.app.state.config.USER_PERMISSIONS
     ):
@@ -81,11 +79,7 @@ async def get_prompt_by_command(command: str, user=Depends(get_verified_user)):
     prompt = Prompts.get_prompt_by_command(f"/{command}")
 
     if prompt:
-        if (
-            user.role == "admin"
-            or prompt.user_id == user.id
-            or has_access(user.id, "read", prompt.access_control)
-        ):
+        if user.role == "admin" or prompt.user_id == user.id or has_access(user.id, "read", prompt.access_control):
             return prompt
     else:
         raise HTTPException(
@@ -113,11 +107,7 @@ async def update_prompt_by_command(
         )
 
     # Is the user the original creator, in a group with write access, or an admin
-    if (
-        prompt.user_id != user.id
-        and not has_access(user.id, "write", prompt.access_control)
-        and user.role != "admin"
-    ):
+    if prompt.user_id != user.id and not has_access(user.id, "write", prompt.access_control) and user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
@@ -147,11 +137,7 @@ async def delete_prompt_by_command(command: str, user=Depends(get_verified_user)
             detail=ERROR_MESSAGES.NOT_FOUND,
         )
 
-    if (
-        prompt.user_id != user.id
-        and not has_access(user.id, "write", prompt.access_control)
-        and user.role != "admin"
-    ):
+    if prompt.user_id != user.id and not has_access(user.id, "write", prompt.access_control) and user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=ERROR_MESSAGES.ACCESS_PROHIBITED,

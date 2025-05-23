@@ -90,9 +90,7 @@ async def get_function_models(request):
                 log.exception(e)
                 sub_pipes = []
 
-            log.debug(
-                f"get_function_models: function '{pipe.id}' is a manifold of {sub_pipes}"
-            )
+            log.debug(f"get_function_models: function '{pipe.id}' is a manifold of {sub_pipes}")
 
             for p in sub_pipes:
                 sub_pipe_id = f'{pipe.id}.{p["id"]}'
@@ -134,9 +132,7 @@ async def get_function_models(request):
     return pipe_models
 
 
-async def generate_function_chat_completion(
-    request, form_data, user, models: dict = {}
-):
+async def generate_function_chat_completion(request, form_data, user, models: dict = {}):
     async def execute_pipe(pipe, params):
         if inspect.iscoroutinefunction(pipe):
             return await pipe(**params)
@@ -183,9 +179,7 @@ async def generate_function_chat_completion(
 
         # Get the signature of the function
         sig = inspect.signature(function_module.pipe)
-        params = {"body": form_data} | {
-            k: v for k, v in extra_params.items() if k in sig.parameters
-        }
+        params = {"body": form_data} | {k: v for k, v in extra_params.items() if k in sig.parameters}
 
         if "__user__" in params and hasattr(function_module, "UserValves"):
             user_valves = Functions.get_user_valves_by_id_and_user_id(pipe_id, user.id)
@@ -201,7 +195,8 @@ async def generate_function_chat_completion(
     model_info = Models.get_model_by_id(model_id)
 
     metadata = form_data.pop("metadata", {})
-
+    # MARK 将metadata中的features添加到form_data中
+    form_data["features"] = metadata.get("features", {})
     files = metadata.get("files", [])
     tool_ids = metadata.get("tool_ids", [])
     # Check if tool_ids is None
@@ -297,9 +292,7 @@ async def generate_function_chat_completion(
                     yield process_line(form_data, line)
 
             if isinstance(res, str) or isinstance(res, Generator):
-                finish_message = openai_chat_chunk_message_template(
-                    form_data["model"], ""
-                )
+                finish_message = openai_chat_chunk_message_template(form_data["model"], "")
                 finish_message["choices"][0]["finish_reason"] = "stop"
                 yield f"data: {json.dumps(finish_message)}\n\n"
                 yield "data: [DONE]"

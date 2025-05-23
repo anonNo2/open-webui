@@ -107,15 +107,11 @@ class AuditContext:
 
     def add_request_chunk(self, chunk: bytes):
         if len(self.request_body) < self.max_body_size:
-            self.request_body.extend(
-                chunk[: self.max_body_size - len(self.request_body)]
-            )
+            self.request_body.extend(chunk[: self.max_body_size - len(self.request_body)])
 
     def add_response_chunk(self, chunk: bytes):
         if len(self.response_body) < self.max_body_size:
-            self.response_body.extend(
-                chunk[: self.max_body_size - len(self.response_body)]
-            )
+            self.response_body.extend(chunk[: self.max_body_size - len(self.response_body)])
 
 
 class AuditLoggingMiddleware:
@@ -178,9 +174,7 @@ class AuditLoggingMiddleware:
             await self.app(scope, receive_wrapper, send_wrapper)
 
     @asynccontextmanager
-    async def _audit_context(
-        self, request: Request
-    ) -> AsyncGenerator[AuditContext, None]:
+    async def _audit_context(self, request: Request) -> AsyncGenerator[AuditContext, None]:
         """
         async context manager that ensures that an audit log entry is recorded after the request is processed.
         """
@@ -225,9 +219,7 @@ class AuditLoggingMiddleware:
             return True
 
         # match either /api/<resource>/...(for the endpoint /api/chat case) or /api/v1/<resource>/...
-        pattern = re.compile(
-            r"^/api(?:/v1)?/(" + "|".join(self.excluded_paths) + r")\b"
-        )
+        pattern = re.compile(r"^/api(?:/v1)?/(" + "|".join(self.excluded_paths) + r")\b")
         if pattern.match(request.url.path):
             return True
 

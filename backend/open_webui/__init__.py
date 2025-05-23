@@ -17,15 +17,13 @@ def version_callback(value: bool):
     if value:
         from open_webui.env import VERSION
 
-        typer.echo(f"Open WebUI version: {VERSION}")
+        typer.echo(f"CSEI-GPT version: {VERSION}")
         raise typer.Exit()
 
 
 @app.command()
 def main(
-    version: Annotated[
-        Optional[bool], typer.Option("--version", callback=version_callback)
-    ] = None,
+    version: Annotated[Optional[bool], typer.Option("--version", callback=version_callback)] = None,
 ):
     pass
 
@@ -37,9 +35,7 @@ def serve(
 ):
     os.environ["FROM_INIT_PY"] = "true"
     if os.getenv("WEBUI_SECRET_KEY") is None:
-        typer.echo(
-            "Loading WEBUI_SECRET_KEY from file, not provided as an environment variable."
-        )
+        typer.echo("Loading WEBUI_SECRET_KEY from file, not provided as an environment variable.")
         if not KEY_FILE.exists():
             typer.echo(f"Generating a new secret key and saving it to {KEY_FILE}")
             KEY_FILE.write_bytes(base64.b64encode(random.randbytes(12)))
@@ -47,9 +43,7 @@ def serve(
         os.environ["WEBUI_SECRET_KEY"] = KEY_FILE.read_text()
 
     if os.getenv("USE_CUDA_DOCKER", "false") == "true":
-        typer.echo(
-            "CUDA is enabled, appending LD_LIBRARY_PATH to include torch/cudnn & cublas libraries."
-        )
+        typer.echo("CUDA is enabled, appending LD_LIBRARY_PATH to include torch/cudnn & cublas libraries.")
         LD_LIBRARY_PATH = os.getenv("LD_LIBRARY_PATH", "").split(":")
         os.environ["LD_LIBRARY_PATH"] = ":".join(
             LD_LIBRARY_PATH

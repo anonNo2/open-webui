@@ -256,6 +256,7 @@ export const updateLdapServer = async (token: string = '', body: object) => {
 
 export const userSignIn = async (email: string, password: string) => {
 	let error = null;
+	let statusCode: number | null = null;
 
 	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/signin`, {
 		method: 'POST',
@@ -269,18 +270,27 @@ export const userSignIn = async (email: string, password: string) => {
 		})
 	})
 		.then(async (res) => {
-			if (!res.ok) throw await res.json();
+			console.log('登录响应:', res);
+			if (!res.ok) {
+				statusCode = res.status;
+				throw await res.json();
+			}
 			return res.json();
 		})
 		.catch((err) => {
-			console.error(err);
+			console.log('登录错误详情:', err, '状态码:', statusCode);
 
 			error = err.detail;
+			// 添加状态码到错误信息中
+			if (statusCode) {
+				err.statusCode = statusCode;
+			}
 			return null;
 		});
 
 	if (error) {
-		throw error;
+		const errorObj: { message: string; statusCode: number | null } = { message: error, statusCode };
+		throw errorObj;
 	}
 
 	return res;

@@ -79,9 +79,7 @@ class QueryMemoryForm(BaseModel):
 
 
 @router.post("/query")
-async def query_memory(
-    request: Request, form_data: QueryMemoryForm, user=Depends(get_verified_user)
-):
+async def query_memory(request: Request, form_data: QueryMemoryForm, user=Depends(get_verified_user)):
     results = VECTOR_DB_CLIENT.search(
         collection_name=f"user-memory-{user.id}",
         vectors=[request.app.state.EMBEDDING_FUNCTION(form_data.content, user=user)],
@@ -95,9 +93,7 @@ async def query_memory(
 # ResetMemoryFromVectorDB
 ############################
 @router.post("/reset", response_model=bool)
-async def reset_memory_from_vector_db(
-    request: Request, user=Depends(get_verified_user)
-):
+async def reset_memory_from_vector_db(request: Request, user=Depends(get_verified_user)):
     VECTOR_DB_CLIENT.delete_collection(f"user-memory-{user.id}")
 
     memories = Memories.get_memories_by_user_id(user.id)
@@ -166,9 +162,7 @@ async def update_memory_by_id(
                 {
                     "id": memory.id,
                     "text": memory.content,
-                    "vector": request.app.state.EMBEDDING_FUNCTION(
-                        memory.content, user=user
-                    ),
+                    "vector": request.app.state.EMBEDDING_FUNCTION(memory.content, user=user),
                     "metadata": {
                         "created_at": memory.created_at,
                         "updated_at": memory.updated_at,
@@ -190,9 +184,7 @@ async def delete_memory_by_id(memory_id: str, user=Depends(get_verified_user)):
     result = Memories.delete_memory_by_id_and_user_id(memory_id, user.id)
 
     if result:
-        VECTOR_DB_CLIENT.delete(
-            collection_name=f"user-memory-{user.id}", ids=[memory_id]
-        )
+        VECTOR_DB_CLIENT.delete(collection_name=f"user-memory-{user.id}", ids=[memory_id])
         return True
 
     return False

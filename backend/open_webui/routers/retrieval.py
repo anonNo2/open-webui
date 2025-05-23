@@ -261,36 +261,22 @@ class EmbeddingModelUpdateForm(BaseModel):
 
 
 @router.post("/embedding/update")
-async def update_embedding_config(
-    request: Request, form_data: EmbeddingModelUpdateForm, user=Depends(get_admin_user)
-):
-    log.info(
-        f"Updating embedding model: {request.app.state.config.RAG_EMBEDDING_MODEL} to {form_data.embedding_model}"
-    )
+async def update_embedding_config(request: Request, form_data: EmbeddingModelUpdateForm, user=Depends(get_admin_user)):
+    log.info(f"Updating embedding model: {request.app.state.config.RAG_EMBEDDING_MODEL} to {form_data.embedding_model}")
     try:
         request.app.state.config.RAG_EMBEDDING_ENGINE = form_data.embedding_engine
         request.app.state.config.RAG_EMBEDDING_MODEL = form_data.embedding_model
 
         if request.app.state.config.RAG_EMBEDDING_ENGINE in ["ollama", "openai"]:
             if form_data.openai_config is not None:
-                request.app.state.config.RAG_OPENAI_API_BASE_URL = (
-                    form_data.openai_config.url
-                )
-                request.app.state.config.RAG_OPENAI_API_KEY = (
-                    form_data.openai_config.key
-                )
+                request.app.state.config.RAG_OPENAI_API_BASE_URL = form_data.openai_config.url
+                request.app.state.config.RAG_OPENAI_API_KEY = form_data.openai_config.key
 
             if form_data.ollama_config is not None:
-                request.app.state.config.RAG_OLLAMA_BASE_URL = (
-                    form_data.ollama_config.url
-                )
-                request.app.state.config.RAG_OLLAMA_API_KEY = (
-                    form_data.ollama_config.key
-                )
+                request.app.state.config.RAG_OLLAMA_BASE_URL = form_data.ollama_config.url
+                request.app.state.config.RAG_OLLAMA_API_KEY = form_data.ollama_config.key
 
-            request.app.state.config.RAG_EMBEDDING_BATCH_SIZE = (
-                form_data.embedding_batch_size
-            )
+            request.app.state.config.RAG_EMBEDDING_BATCH_SIZE = form_data.embedding_batch_size
 
         request.app.state.ef = get_ef(
             request.app.state.config.RAG_EMBEDDING_ENGINE,
@@ -952,9 +938,7 @@ def save_docs_to_vector_db(
 
         return ", ".join(docs_info)
 
-    log.info(
-        f"save_docs_to_vector_db: document {_get_docs_info(docs)} {collection_name}"
-    )
+    log.info(f"save_docs_to_vector_db: document {_get_docs_info(docs)} {collection_name}")
 
     # Check if entries with the same hash (metadata.hash) already exist
     if metadata and "hash" in metadata:
@@ -977,9 +961,7 @@ def save_docs_to_vector_db(
                 add_start_index=True,
             )
         elif request.app.state.config.TEXT_SPLITTER == "token":
-            log.info(
-                f"Using token text splitter: {request.app.state.config.TIKTOKEN_ENCODING_NAME}"
-            )
+            log.info(f"Using token text splitter: {request.app.state.config.TIKTOKEN_ENCODING_NAME}")
 
             tiktoken.get_encoding(str(request.app.state.config.TIKTOKEN_ENCODING_NAME))
             text_splitter = TokenTextSplitter(
@@ -1015,11 +997,7 @@ def save_docs_to_vector_db(
     # for meta-data so convert them to string.
     for metadata in metadatas:
         for key, value in metadata.items():
-            if (
-                isinstance(value, datetime)
-                or isinstance(value, list)
-                or isinstance(value, dict)
-            ):
+            if isinstance(value, datetime) or isinstance(value, list) or isinstance(value, dict):
                 metadata[key] = str(value)
 
     try:
@@ -1030,9 +1008,7 @@ def save_docs_to_vector_db(
                 VECTOR_DB_CLIENT.delete_collection(collection_name=collection_name)
                 log.info(f"deleting existing collection {collection_name}")
             elif add is False:
-                log.info(
-                    f"collection {collection_name} already exists, overwrite is False and add is False"
-                )
+                log.info(f"collection {collection_name} already exists, overwrite is False and add is False")
                 return True
 
         log.info(f"adding to collection {collection_name}")
@@ -1129,9 +1105,7 @@ def process_file(
             # Check if the file has already been processed and save the content
             # Usage: /knowledge/{id}/file/add, /knowledge/{id}/file/update
 
-            result = VECTOR_DB_CLIENT.query(
-                collection_name=f"file-{file.id}", filter={"file_id": file.id}
-            )
+            result = VECTOR_DB_CLIENT.query(collection_name=f"file-{file.id}", filter={"file_id": file.id})
 
             if result is not None and len(result.ids[0]) > 0:
                 docs = [
@@ -1176,9 +1150,7 @@ def process_file(
                     DOCUMENT_INTELLIGENCE_KEY=request.app.state.config.DOCUMENT_INTELLIGENCE_KEY,
                     MISTRAL_OCR_API_KEY=request.app.state.config.MISTRAL_OCR_API_KEY,
                 )
-                docs = loader.load(
-                    file.filename, file.meta.get("content_type"), file_path
-                )
+                docs = loader.load(file.filename, file.meta.get("content_type"), file_path)
 
                 docs = [
                     Document(
@@ -1310,9 +1282,7 @@ def process_text(
 
 
 @router.post("/process/youtube")
-def process_youtube_video(
-    request: Request, form_data: ProcessUrlForm, user=Depends(get_verified_user)
-):
+def process_youtube_video(request: Request, form_data: ProcessUrlForm, user=Depends(get_verified_user)):
     try:
         collection_name = form_data.collection_name
         if not collection_name:
@@ -1328,9 +1298,7 @@ def process_youtube_video(
         content = " ".join([doc.page_content for doc in docs])
         log.debug(f"text_content: {content}")
 
-        save_docs_to_vector_db(
-            request, docs, collection_name, overwrite=True, user=user
-        )
+        save_docs_to_vector_db(request, docs, collection_name, overwrite=True, user=user)
 
         return {
             "status": True,
@@ -1354,9 +1322,7 @@ def process_youtube_video(
 
 
 @router.post("/process/web")
-def process_web(
-    request: Request, form_data: ProcessUrlForm, user=Depends(get_verified_user)
-):
+def process_web(request: Request, form_data: ProcessUrlForm, user=Depends(get_verified_user)):
     try:
         collection_name = form_data.collection_name
         if not collection_name:
@@ -1373,9 +1339,7 @@ def process_web(
         log.debug(f"text_content: {content}")
 
         if not request.app.state.config.BYPASS_WEB_SEARCH_EMBEDDING_AND_RETRIEVAL:
-            save_docs_to_vector_db(
-                request, docs, collection_name, overwrite=True, user=user
-            )
+            save_docs_to_vector_db(request, docs, collection_name, overwrite=True, user=user)
         else:
             collection_name = None
 
@@ -1448,10 +1412,7 @@ def search_web(request: Request, engine: str, query: str) -> list[SearchResult]:
         else:
             raise Exception("No YACY_QUERY_URL found in environment variables")
     elif engine == "google_pse":
-        if (
-            request.app.state.config.GOOGLE_PSE_API_KEY
-            and request.app.state.config.GOOGLE_PSE_ENGINE_ID
-        ):
+        if request.app.state.config.GOOGLE_PSE_API_KEY and request.app.state.config.GOOGLE_PSE_ENGINE_ID:
             return search_google_pse(
                 request.app.state.config.GOOGLE_PSE_API_KEY,
                 request.app.state.config.GOOGLE_PSE_ENGINE_ID,
@@ -1460,9 +1421,7 @@ def search_web(request: Request, engine: str, query: str) -> list[SearchResult]:
                 request.app.state.config.WEB_SEARCH_DOMAIN_FILTER_LIST,
             )
         else:
-            raise Exception(
-                "No GOOGLE_PSE_API_KEY or GOOGLE_PSE_ENGINE_ID found in environment variables"
-            )
+            raise Exception("No GOOGLE_PSE_API_KEY or GOOGLE_PSE_ENGINE_ID found in environment variables")
     elif engine == "brave":
         if request.app.state.config.BRAVE_SEARCH_API_KEY:
             return search_brave(
@@ -1972,9 +1931,7 @@ def process_files_batch(
 
         except Exception as e:
             log.error(f"process_files_batch: Error processing file {file.id}: {str(e)}")
-            errors.append(
-                BatchProcessFilesResult(file_id=file.id, status="failed", error=str(e))
-            )
+            errors.append(BatchProcessFilesResult(file_id=file.id, status="failed", error=str(e)))
 
     # Save all documents in one batch
     if all_docs:
@@ -1989,19 +1946,13 @@ def process_files_batch(
 
             # Update all files with collection name
             for result in results:
-                Files.update_file_metadata_by_id(
-                    result.file_id, {"collection_name": collection_name}
-                )
+                Files.update_file_metadata_by_id(result.file_id, {"collection_name": collection_name})
                 result.status = "completed"
 
         except Exception as e:
-            log.error(
-                f"process_files_batch: Error saving documents to vector DB: {str(e)}"
-            )
+            log.error(f"process_files_batch: Error saving documents to vector DB: {str(e)}")
             for result in results:
                 result.status = "failed"
-                errors.append(
-                    BatchProcessFilesResult(file_id=result.file_id, error=str(e))
-                )
+                errors.append(BatchProcessFilesResult(file_id=result.file_id, error=str(e)))
 
     return BatchProcessFilesResponse(results=results, errors=errors)

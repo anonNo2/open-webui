@@ -1102,6 +1102,7 @@
 	"Sign in": "Prisijungti",
 	"Sign in to {{WEBUI_NAME}}": "",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "",
+	"Sign In(authenticated)": "Prisijungimas (patvirtintas)",
 	"Sign Out": "Atsijungti",
 	"Sign up": "Sukurti paskyrą",
 	"Sign up to {{WEBUI_NAME}}": "",

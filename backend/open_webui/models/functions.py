@@ -81,9 +81,7 @@ class FunctionValves(BaseModel):
 
 
 class FunctionsTable:
-    def insert_new_function(
-        self, user_id: str, type: str, form_data: FunctionForm
-    ) -> Optional[FunctionModel]:
+    def insert_new_function(self, user_id: str, type: str, form_data: FunctionForm) -> Optional[FunctionModel]:
         function = FunctionModel(
             **{
                 **form_data.model_dump(),
@@ -124,44 +122,32 @@ class FunctionsTable:
                     for function in db.query(Function).filter_by(is_active=True).all()
                 ]
             else:
-                return [
-                    FunctionModel.model_validate(function)
-                    for function in db.query(Function).all()
-                ]
+                return [FunctionModel.model_validate(function) for function in db.query(Function).all()]
 
-    def get_functions_by_type(
-        self, type: str, active_only=False
-    ) -> list[FunctionModel]:
+    def get_functions_by_type(self, type: str, active_only=False) -> list[FunctionModel]:
         with get_db() as db:
             if active_only:
                 return [
                     FunctionModel.model_validate(function)
-                    for function in db.query(Function)
-                    .filter_by(type=type, is_active=True)
-                    .all()
+                    for function in db.query(Function).filter_by(type=type, is_active=True).all()
                 ]
             else:
                 return [
-                    FunctionModel.model_validate(function)
-                    for function in db.query(Function).filter_by(type=type).all()
+                    FunctionModel.model_validate(function) for function in db.query(Function).filter_by(type=type).all()
                 ]
 
     def get_global_filter_functions(self) -> list[FunctionModel]:
         with get_db() as db:
             return [
                 FunctionModel.model_validate(function)
-                for function in db.query(Function)
-                .filter_by(type="filter", is_active=True, is_global=True)
-                .all()
+                for function in db.query(Function).filter_by(type="filter", is_active=True, is_global=True).all()
             ]
 
     def get_global_action_functions(self) -> list[FunctionModel]:
         with get_db() as db:
             return [
                 FunctionModel.model_validate(function)
-                for function in db.query(Function)
-                .filter_by(type="action", is_active=True, is_global=True)
-                .all()
+                for function in db.query(Function).filter_by(type="action", is_active=True, is_global=True).all()
             ]
 
     def get_function_valves_by_id(self, id: str) -> Optional[dict]:
@@ -173,9 +159,7 @@ class FunctionsTable:
                 log.exception(f"Error getting function valves by id {id}: {e}")
                 return None
 
-    def update_function_valves_by_id(
-        self, id: str, valves: dict
-    ) -> Optional[FunctionValves]:
+    def update_function_valves_by_id(self, id: str, valves: dict) -> Optional[FunctionValves]:
         with get_db() as db:
             try:
                 function = db.get(Function, id)
@@ -187,9 +171,7 @@ class FunctionsTable:
             except Exception:
                 return None
 
-    def get_user_valves_by_id_and_user_id(
-        self, id: str, user_id: str
-    ) -> Optional[dict]:
+    def get_user_valves_by_id_and_user_id(self, id: str, user_id: str) -> Optional[dict]:
         try:
             user = Users.get_user_by_id(user_id)
             user_settings = user.settings.model_dump() if user.settings else {}
@@ -202,14 +184,10 @@ class FunctionsTable:
 
             return user_settings["functions"]["valves"].get(id, {})
         except Exception as e:
-            log.exception(
-                f"Error getting user values by id {id} and user id {user_id}: {e}"
-            )
+            log.exception(f"Error getting user values by id {id} and user id {user_id}: {e}")
             return None
 
-    def update_user_valves_by_id_and_user_id(
-        self, id: str, user_id: str, valves: dict
-    ) -> Optional[dict]:
+    def update_user_valves_by_id_and_user_id(self, id: str, user_id: str, valves: dict) -> Optional[dict]:
         try:
             user = Users.get_user_by_id(user_id)
             user_settings = user.settings.model_dump() if user.settings else {}
@@ -227,9 +205,7 @@ class FunctionsTable:
 
             return user_settings["functions"]["valves"][id]
         except Exception as e:
-            log.exception(
-                f"Error updating user valves by id {id} and user_id {user_id}: {e}"
-            )
+            log.exception(f"Error updating user valves by id {id} and user_id {user_id}: {e}")
             return None
 
     def update_function_by_id(self, id: str, updated: dict) -> Optional[FunctionModel]:

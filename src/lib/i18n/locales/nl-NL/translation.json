@@ -1102,6 +1102,7 @@
 	"Sign in": "Inloggen",
 	"Sign in to {{WEBUI_NAME}}": "Log in bij {{WEBUI_NAME}}",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "Log in bij {{WEBUI_NAME}} met LDAP",
+	"Sign In(authenticated)": "Inloggen (geauthenticeerd)",
 	"Sign Out": "Uitloggen",
 	"Sign up": "Registreren",
 	"Sign up to {{WEBUI_NAME}}": "Meld je aan bij {{WEBUI_NAME}}",

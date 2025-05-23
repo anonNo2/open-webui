@@ -1102,6 +1102,7 @@
 	"Sign in": "サインイン",
 	"Sign in to {{WEBUI_NAME}}": "{{WEBUI_NAME}}にサインイン",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "{{WEBUI_NAME}}にLDAPでサインイン",
+	"Sign In(authenticated)": "サインイン(認証済み)",
 	"Sign Out": "サインアウト",
 	"Sign up": "サインアップ",
 	"Sign up to {{WEBUI_NAME}}": "{{WEBUI_NAME}}にサインアップ",

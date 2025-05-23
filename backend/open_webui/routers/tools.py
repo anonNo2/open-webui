@@ -181,11 +181,7 @@ async def get_tools_by_id(id: str, user=Depends(get_verified_user)):
     tools = Tools.get_tool_by_id(id)
 
     if tools:
-        if (
-            user.role == "admin"
-            or tools.user_id == user.id
-            or has_access(user.id, "read", tools.access_control)
-        ):
+        if user.role == "admin" or tools.user_id == user.id or has_access(user.id, "read", tools.access_control):
             return tools
     else:
         raise HTTPException(
@@ -214,11 +210,7 @@ async def update_tools_by_id(
         )
 
     # Is the user the original creator, in a group with write access, or an admin
-    if (
-        tools.user_id != user.id
-        and not has_access(user.id, "write", tools.access_control)
-        and user.role != "admin"
-    ):
+    if tools.user_id != user.id and not has_access(user.id, "write", tools.access_control) and user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=ERROR_MESSAGES.UNAUTHORIZED,
@@ -263,9 +255,7 @@ async def update_tools_by_id(
 
 
 @router.delete("/id/{id}/delete", response_model=bool)
-async def delete_tools_by_id(
-    request: Request, id: str, user=Depends(get_verified_user)
-):
+async def delete_tools_by_id(request: Request, id: str, user=Depends(get_verified_user)):
     tools = Tools.get_tool_by_id(id)
     if not tools:
         raise HTTPException(
@@ -273,11 +263,7 @@ async def delete_tools_by_id(
             detail=ERROR_MESSAGES.NOT_FOUND,
         )
 
-    if (
-        tools.user_id != user.id
-        and not has_access(user.id, "write", tools.access_control)
-        and user.role != "admin"
-    ):
+    if tools.user_id != user.id and not has_access(user.id, "write", tools.access_control) and user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=ERROR_MESSAGES.UNAUTHORIZED,
@@ -322,9 +308,7 @@ async def get_tools_valves_by_id(id: str, user=Depends(get_verified_user)):
 
 
 @router.get("/id/{id}/valves/spec", response_model=Optional[dict])
-async def get_tools_valves_spec_by_id(
-    request: Request, id: str, user=Depends(get_verified_user)
-):
+async def get_tools_valves_spec_by_id(request: Request, id: str, user=Depends(get_verified_user)):
     tools = Tools.get_tool_by_id(id)
     if tools:
         if id in request.app.state.TOOLS:
@@ -350,9 +334,7 @@ async def get_tools_valves_spec_by_id(
 
 
 @router.post("/id/{id}/valves/update", response_model=Optional[dict])
-async def update_tools_valves_by_id(
-    request: Request, id: str, form_data: dict, user=Depends(get_verified_user)
-):
+async def update_tools_valves_by_id(request: Request, id: str, form_data: dict, user=Depends(get_verified_user)):
     tools = Tools.get_tool_by_id(id)
     if not tools:
         raise HTTPException(
@@ -360,11 +342,7 @@ async def update_tools_valves_by_id(
             detail=ERROR_MESSAGES.NOT_FOUND,
         )
 
-    if (
-        tools.user_id != user.id
-        and not has_access(user.id, "write", tools.access_control)
-        and user.role != "admin"
-    ):
+    if tools.user_id != user.id and not has_access(user.id, "write", tools.access_control) and user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
@@ -421,9 +399,7 @@ async def get_tools_user_valves_by_id(id: str, user=Depends(get_verified_user)):
 
 
 @router.get("/id/{id}/valves/user/spec", response_model=Optional[dict])
-async def get_tools_user_valves_spec_by_id(
-    request: Request, id: str, user=Depends(get_verified_user)
-):
+async def get_tools_user_valves_spec_by_id(request: Request, id: str, user=Depends(get_verified_user)):
     tools = Tools.get_tool_by_id(id)
     if tools:
         if id in request.app.state.TOOLS:
@@ -444,9 +420,7 @@ async def get_tools_user_valves_spec_by_id(
 
 
 @router.post("/id/{id}/valves/user/update", response_model=Optional[dict])
-async def update_tools_user_valves_by_id(
-    request: Request, id: str, form_data: dict, user=Depends(get_verified_user)
-):
+async def update_tools_user_valves_by_id(request: Request, id: str, form_data: dict, user=Depends(get_verified_user)):
     tools = Tools.get_tool_by_id(id)
 
     if tools:
@@ -462,9 +436,7 @@ async def update_tools_user_valves_by_id(
             try:
                 form_data = {k: v for k, v in form_data.items() if v is not None}
                 user_valves = UserValves(**form_data)
-                Tools.update_user_valves_by_id_and_user_id(
-                    id, user.id, user_valves.model_dump()
-                )
+                Tools.update_user_valves_by_id_and_user_id(id, user.id, user_valves.model_dump())
                 return user_valves.model_dump()
             except Exception as e:
                 log.exception(f"Failed to update user valves by id {id}: {e}")

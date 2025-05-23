@@ -1102,6 +1102,7 @@
 	"Sign in": "Đăng nhập",
 	"Sign in to {{WEBUI_NAME}}": "Đăng nhập vào {{WEBUI_NAME}}",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "Đăng nhập vào {{WEBUI_NAME}} bằng LDAP",
+	"Sign In(authenticated)": "Đăng nhập (đã xác thực)",
 	"Sign Out": "Đăng xuất",
 	"Sign up": "Đăng ký",
 	"Sign up to {{WEBUI_NAME}}": "Đăng ký {{WEBUI_NAME}}",

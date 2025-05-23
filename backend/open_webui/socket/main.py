@@ -120,9 +120,7 @@ async def periodic_usage_pool_cleanup():
             for model_id, connections in list(USAGE_POOL.items()):
                 # Creating a list of sids to remove if they have timed out
                 expired_sids = [
-                    sid
-                    for sid, details in connections.items()
-                    if now - details["updated_at"] > TIMEOUT_DURATION
+                    sid for sid, details in connections.items() if now - details["updated_at"] > TIMEOUT_DURATION
                 ]
 
                 for sid in expired_sids:
@@ -403,11 +401,7 @@ def get_user_ids_from_room(room):
         room=room,
     )
 
-    active_user_ids = list(
-        set(
-            [SESSION_POOL.get(session_id[0])["id"] for session_id in active_session_ids]
-        )
-    )
+    active_user_ids = list(set([SESSION_POOL.get(session_id[0])["id"] for session_id in active_session_ids]))
     return active_user_ids
 
 

@@ -59,9 +59,7 @@ class FolderForm(BaseModel):
 
 
 class FolderTable:
-    def insert_new_folder(
-        self, user_id: str, name: str, parent_id: Optional[str] = None
-    ) -> Optional[FolderModel]:
+    def insert_new_folder(self, user_id: str, name: str, parent_id: Optional[str] = None) -> Optional[FolderModel]:
         with get_db() as db:
             id = str(uuid.uuid4())
             folder = FolderModel(
@@ -87,9 +85,7 @@ class FolderTable:
                 log.exception(f"Error inserting a new folder: {e}")
                 return None
 
-    def get_folder_by_id_and_user_id(
-        self, id: str, user_id: str
-    ) -> Optional[FolderModel]:
+    def get_folder_by_id_and_user_id(self, id: str, user_id: str) -> Optional[FolderModel]:
         try:
             with get_db() as db:
                 folder = db.query(Folder).filter_by(id=id, user_id=user_id).first()
@@ -101,17 +97,13 @@ class FolderTable:
         except Exception:
             return None
 
-    def get_children_folders_by_id_and_user_id(
-        self, id: str, user_id: str
-    ) -> Optional[FolderModel]:
+    def get_children_folders_by_id_and_user_id(self, id: str, user_id: str) -> Optional[FolderModel]:
         try:
             with get_db() as db:
                 folders = []
 
                 def get_children(folder):
-                    children = self.get_folders_by_parent_id_and_user_id(
-                        folder.id, user_id
-                    )
+                    children = self.get_folders_by_parent_id_and_user_id(folder.id, user_id)
                     for child in children:
                         get_children(child)
                         folders.append(child)
@@ -127,10 +119,7 @@ class FolderTable:
 
     def get_folders_by_user_id(self, user_id: str) -> list[FolderModel]:
         with get_db() as db:
-            return [
-                FolderModel.model_validate(folder)
-                for folder in db.query(Folder).filter_by(user_id=user_id).all()
-            ]
+            return [FolderModel.model_validate(folder) for folder in db.query(Folder).filter_by(user_id=user_id).all()]
 
     def get_folder_by_parent_id_and_user_id_and_name(
         self, parent_id: Optional[str], user_id: str, name: str
@@ -153,15 +142,11 @@ class FolderTable:
             log.error(f"get_folder_by_parent_id_and_user_id_and_name: {e}")
             return None
 
-    def get_folders_by_parent_id_and_user_id(
-        self, parent_id: Optional[str], user_id: str
-    ) -> list[FolderModel]:
+    def get_folders_by_parent_id_and_user_id(self, parent_id: Optional[str], user_id: str) -> list[FolderModel]:
         with get_db() as db:
             return [
                 FolderModel.model_validate(folder)
-                for folder in db.query(Folder)
-                .filter_by(parent_id=parent_id, user_id=user_id)
-                .all()
+                for folder in db.query(Folder).filter_by(parent_id=parent_id, user_id=user_id).all()
             ]
 
     def update_folder_parent_id_by_id_and_user_id(
@@ -187,9 +172,7 @@ class FolderTable:
             log.error(f"update_folder: {e}")
             return
 
-    def update_folder_name_by_id_and_user_id(
-        self, id: str, user_id: str, name: str
-    ) -> Optional[FolderModel]:
+    def update_folder_name_by_id_and_user_id(self, id: str, user_id: str, name: str) -> Optional[FolderModel]:
         try:
             with get_db() as db:
                 folder = db.query(Folder).filter_by(id=id, user_id=user_id).first()
@@ -198,9 +181,7 @@ class FolderTable:
                     return None
 
                 existing_folder = (
-                    db.query(Folder)
-                    .filter_by(name=name, parent_id=folder.parent_id, user_id=user_id)
-                    .first()
+                    db.query(Folder).filter_by(name=name, parent_id=folder.parent_id, user_id=user_id).first()
                 )
 
                 if existing_folder:
@@ -251,9 +232,7 @@ class FolderTable:
 
                 # Delete all children folders
                 def delete_children(folder):
-                    folder_children = self.get_folders_by_parent_id_and_user_id(
-                        folder.id, user_id
-                    )
+                    folder_children = self.get_folders_by_parent_id_and_user_id(folder.id, user_id)
                     for folder_child in folder_children:
                         if delete_chats:
                             Chats.delete_chats_by_user_id_and_folder_id(

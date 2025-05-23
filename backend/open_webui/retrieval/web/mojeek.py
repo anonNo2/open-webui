@@ -9,9 +9,7 @@ log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["RAG"])
 
 
-def search_mojeek(
-    api_key: str, query: str, count: int, filter_list: Optional[list[str]] = None
-) -> list[SearchResult]:
+def search_mojeek(api_key: str, query: str, count: int, filter_list: Optional[list[str]] = None) -> list[SearchResult]:
     """Search using Mojeek's Search API and return the results as a list of SearchResult objects.
 
     Args:
@@ -33,8 +31,5 @@ def search_mojeek(
         results = get_filtered_results(results, filter_list)
 
     return [
-        SearchResult(
-            link=result["url"], title=result.get("title"), snippet=result.get("desc")
-        )
-        for result in results
+        SearchResult(link=result["url"], title=result.get("title"), snippet=result.get("desc")) for result in results
     ]

@@ -1102,6 +1102,7 @@
 	"Sign in": "S'identifier",
 	"Sign in to {{WEBUI_NAME}}": "",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "",
+	"Sign In(authenticated)": "S'identifier (authentifié)",
 	"Sign Out": "Déconnexion",
 	"Sign up": "Inscrivez-vous",
 	"Sign up to {{WEBUI_NAME}}": "",

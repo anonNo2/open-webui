@@ -1102,6 +1102,7 @@
 	"Sign in": "Prihlásiť sa",
 	"Sign in to {{WEBUI_NAME}}": "Prihlásiť sa do {{WEBUI_NAME}}",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "",
+	"Sign In(authenticated)": "Prihlásiť sa (autentifikovaný)",
 	"Sign Out": "Odhlásiť sa",
 	"Sign up": "Zaregistrovať sa",
 	"Sign up to {{WEBUI_NAME}}": "Zaregistrujte sa na {{WEBUI_NAME}}",

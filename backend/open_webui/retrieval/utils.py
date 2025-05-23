@@ -73,9 +73,7 @@ class VectorSearchRetriever(BaseRetriever):
         return results
 
 
-def query_doc(
-    collection_name: str, query_embedding: list[float], k: int, user: UserModel = None
-):
+def query_doc(collection_name: str, query_embedding: list[float], k: int, user: UserModel = None):
     try:
         log.debug(f"query_doc:doc {collection_name}")
         result = VECTOR_DB_CLIENT.search(
@@ -131,9 +129,7 @@ def query_doc_with_hybrid_search(
             top_k=k,
         )
 
-        ensemble_retriever = EnsembleRetriever(
-            retrievers=[bm25_retriever, vector_search_retriever], weights=[0.5, 0.5]
-        )
+        ensemble_retriever = EnsembleRetriever(retrievers=[bm25_retriever, vector_search_retriever], weights=[0.5, 0.5])
         compressor = RerankCompressor(
             embedding_function=embedding_function,
             top_n=k_reranker,
@@ -165,10 +161,7 @@ def query_doc_with_hybrid_search(
             "metadatas": [metadatas],
         }
 
-        log.info(
-            "query_doc_with_hybrid_search:result "
-            + f'{result["metadatas"]} {result["distances"]}'
-        )
+        log.info("query_doc_with_hybrid_search:result " + f'{result["metadatas"]} {result["distances"]}')
         return result
     except Exception as e:
         log.exception(f"Error querying doc {collection_name} with hybrid search: {e}")
@@ -224,9 +217,7 @@ def merge_and_sort_query_results(query_results: list[dict], k: int) -> dict:
     combined.sort(key=lambda x: x[0], reverse=True)
 
     # Slice to keep only the top k elements
-    sorted_distances, sorted_documents, sorted_metadatas = (
-        zip(*combined[:k]) if combined else ([], [], [])
-    )
+    sorted_distances, sorted_documents, sorted_metadatas = zip(*combined[:k]) if combined else ([], [], [])
 
     # Create and return the output dictionary
     return {
@@ -436,9 +427,7 @@ def get_sources_from_files(
     hybrid_search,
     full_context=False,
 ):
-    log.debug(
-        f"files: {files} {queries} {embedding_function} {reranking_function} {full_context}"
-    )
+    log.debug(f"files: {files} {queries} {embedding_function} {reranking_function} {full_context}")
 
     extracted_collections = []
     relevant_contexts = []
@@ -458,10 +447,7 @@ def get_sources_from_files(
                 "documents": [[file.get("file").get("data", {}).get("content")]],
                 "metadatas": [[{"file_id": file.get("id"), "name": file.get("name")}]],
             }
-        elif (
-            file.get("type") != "web_search"
-            and request.app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL
-        ):
+        elif file.get("type") != "web_search" and request.app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL:
             # BYPASS_EMBEDDING_AND_RETRIEVAL
             if file.get("type") == "collection":
                 file_ids = file.get("data", {}).get("file_ids", [])
@@ -504,9 +490,7 @@ def get_sources_from_files(
             elif file.get("file").get("data"):
                 context = {
                     "documents": [[file.get("file").get("data", {}).get("content")]],
-                    "metadatas": [
-                        [file.get("file").get("data", {}).get("metadata", {})]
-                    ],
+                    "metadatas": [[file.get("file").get("data", {}).get("metadata", {})]],
                 }
         else:
             collection_names = []
@@ -552,10 +536,7 @@ def get_sources_from_files(
                                     r=r,
                                 )
                             except Exception as e:
-                                log.debug(
-                                    "Error when using hybrid search, using"
-                                    " non hybrid search as fallback."
-                                )
+                                log.debug("Error when using hybrid search, using" " non hybrid search as fallback.")
 
                         if (not hybrid_search) or (context is None):
                             context = query_collection(
@@ -613,11 +594,7 @@ def get_model_path(model: str, update_model: bool = False):
     log.debug(f"snapshot_kwargs: {snapshot_kwargs}")
 
     # Inspiration from upstream sentence_transformers
-    if (
-        os.path.exists(model)
-        or ("\\" in model or model.count("/") > 1)
-        and local_files_only
-    ):
+    if os.path.exists(model) or ("\\" in model or model.count("/") > 1) and local_files_only:
         # If fully qualified path exists, return input, else set repo_id
         return model
     elif "/" not in model:
@@ -806,9 +783,7 @@ class RerankCompressor(BaseDocumentCompressor):
         reranking = self.reranking_function is not None
 
         if reranking:
-            scores = self.reranking_function.predict(
-                [(query, doc.page_content) for doc in documents]
-            )
+            scores = self.reranking_function.predict([(query, doc.page_content) for doc in documents])
         else:
             from sentence_transformers import util
 
@@ -822,9 +797,7 @@ class RerankCompressor(BaseDocumentCompressor):
             zip(documents, scores.tolist() if not isinstance(scores, list) else scores)
         )
         if self.r_score:
-            docs_with_scores = [
-                (d, s) for d, s in docs_with_scores if s >= self.r_score
-            ]
+            docs_with_scores = [(d, s) for d, s in docs_with_scores if s >= self.r_score]
 
         result = sorted(docs_with_scores, key=operator.itemgetter(1), reverse=True)
         final_results = []

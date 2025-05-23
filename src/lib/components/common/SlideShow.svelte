@@ -2,10 +2,10 @@
 	import { onMount } from 'svelte';
 
 	export let imageUrls = [
-		'/assets/images/adam.jpg',
-		'/assets/images/galaxy.jpg',
-		'/assets/images/earth.jpg',
-		'/assets/images/space.jpg'
+		'/assets/images/banner1.png',
+		'/assets/images/banner2.png',
+		'/assets/images/banner3.png'
+		
 	];
 	export let duration = 5000;
 	let selectedImageIdx = 0;

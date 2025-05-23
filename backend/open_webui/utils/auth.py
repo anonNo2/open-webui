@@ -95,9 +95,7 @@ def get_license_data(app, key):
                         setattr(app.state, "LICENSE_METADATA", v)
                 return True
             else:
-                log.error(
-                    f"License: retrieval issue: {getattr(res, 'text', 'unknown error')}"
-                )
+                log.error(f"License: retrieval issue: {getattr(res, 'text', 'unknown error')}")
         except Exception as ex:
             log.exception(f"License: Uncaught Exception: {ex}")
     return False
@@ -108,9 +106,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def verify_password(plain_password, hashed_password):
-    return (
-        pwd_context.verify(plain_password, hashed_password) if hashed_password else None
-    )
+    return pwd_context.verify(plain_password, hashed_password) if hashed_password else None
 
 
 def get_password_hash(password):
@@ -174,16 +170,11 @@ def get_current_user(
     # auth by api key
     if token.startswith("sk-"):
         if not request.state.enable_api_key:
-            raise HTTPException(
-                status.HTTP_403_FORBIDDEN, detail=ERROR_MESSAGES.API_KEY_NOT_ALLOWED
-            )
+            raise HTTPException(status.HTTP_403_FORBIDDEN, detail=ERROR_MESSAGES.API_KEY_NOT_ALLOWED)
 
         if request.app.state.config.ENABLE_API_KEY_ENDPOINT_RESTRICTIONS:
             allowed_paths = [
-                path.strip()
-                for path in str(
-                    request.app.state.config.API_KEY_ALLOWED_ENDPOINTS
-                ).split(",")
+                path.strip() for path in str(request.app.state.config.API_KEY_ALLOWED_ENDPOINTS).split(",")
             ]
 
             # Check if the request path matches any allowed endpoint.

@@ -84,9 +84,7 @@ async def get_group_by_id(id: str, user=Depends(get_admin_user)):
 
 
 @router.post("/id/{id}/update", response_model=Optional[GroupResponse])
-async def update_group_by_id(
-    id: str, form_data: GroupUpdateForm, user=Depends(get_admin_user)
-):
+async def update_group_by_id(id: str, form_data: GroupUpdateForm, user=Depends(get_admin_user)):
     try:
         if form_data.user_ids:
             form_data.user_ids = Users.get_valid_user_ids(form_data.user_ids)

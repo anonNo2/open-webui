@@ -76,9 +76,7 @@ def search_perplexity(
             results = get_filtered_results(results, filter_list)
 
         return [
-            SearchResult(
-                link=result["link"], title=result["title"], snippet=result["snippet"]
-            )
+            SearchResult(link=result["link"], title=result["title"], snippet=result["snippet"])
             for result in results[:count]
         ]
 

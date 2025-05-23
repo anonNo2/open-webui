@@ -54,12 +54,8 @@ def main():
         default="Top 10 international news today",
         help="The search query.",
     )
-    parser.add_argument(
-        "--count", type=int, default=10, help="Number of search results to return."
-    )
-    parser.add_argument(
-        "--filter", nargs="*", help="List of filters to apply to the search results."
-    )
+    parser.add_argument("--count", type=int, default=10, help="Number of search results to return.")
+    parser.add_argument("--filter", nargs="*", help="List of filters to apply to the search results.")
     parser.add_argument(
         "--locale",
         type=str,

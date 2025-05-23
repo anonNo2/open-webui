@@ -2,7 +2,34 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd "$SCRIPT_DIR" || exit
+export HF_ENDPOINT=https://hf-mirror.com
+export PORT=18080
+#export PORT=12138 # for npm run dev
+export ENABLE_OPENAI_API=false
+export OPENAI_API_BASE_URL=''
+export OPENAI_API_KEY=''
+# admin admin@example.com admin
+#export CORS_ALLOW_ORIGIN='http://localhost:5173;http://localhost:18080;http://localhost:12138;http://10.20.12.36:5173;http://10.20.12.36:18080;http://10.20.12.36:12138'
 export CORS_ALLOW_ORIGIN='*'
+
+export ENABLE_CODE_EXECUTION=false
+export ENABLE_CODE_INTERPRETER=false
+# export CUSTOM_NAME="CSEI-GPT"
+export WEBUI_NAME="SE-GPT"
+
+export USER_PERMISSIONS_CHAT_CONTROLS=false
+export USER_PERMISSIONS_CHAT_FILE_UPLOAD=false
+export USER_PERMISSIONS_CHAT_EDIT=false
+export ENABLE_COMMUNITY_SHARING=false
+
+# 访客模式配置
+export WEBUI_AUTH=true
+export ENABLE_SIGNUP=true
+export ENABLE_AUTO_AUTH=true
+# export AUTH_TRUSTED_EMAIL_HEADER=true
+# export WEBUI_AUTH_TRUSTED_EMAIL_HEADER=X-User-Email
+# export WEBUI_AUTH_TRUSTED_NAME_HEADER=X-User-Name
+# export GUEST_ENABLE_MODEL='gpt-4o-mini;gpt-4o;gpt-3.5-turbo'
 
 # Add conditional Playwright browser installation
 if [[ "${WEB_LOADER_ENGINE,,}" == "playwright" ]]; then

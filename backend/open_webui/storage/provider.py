@@ -189,9 +189,7 @@ class S3StorageProvider(StorageProvider):
                     if not content["Key"].startswith(self.key_prefix):
                         continue
 
-                    self.s3_client.delete_object(
-                        Bucket=self.bucket_name, Key=content["Key"]
-                    )
+                    self.s3_client.delete_object(Bucket=self.bucket_name, Key=content["Key"])
         except ClientError as e:
             raise RuntimeError(f"Error deleting all files from S3: {e}")
 
@@ -280,18 +278,12 @@ class AzureStorageProvider(StorageProvider):
 
         if storage_key:
             # Configure using the Azure Storage Account Endpoint and Key
-            self.blob_service_client = BlobServiceClient(
-                account_url=self.endpoint, credential=storage_key
-            )
+            self.blob_service_client = BlobServiceClient(account_url=self.endpoint, credential=storage_key)
         else:
             # Configure using the Azure Storage Account Endpoint and DefaultAzureCredential
             # If the key is not configured, then the DefaultAzureCredential will be used to support Managed Identity authentication
-            self.blob_service_client = BlobServiceClient(
-                account_url=self.endpoint, credential=DefaultAzureCredential()
-            )
-        self.container_client = self.blob_service_client.get_container_client(
-            self.container_name
-        )
+            self.blob_service_client = BlobServiceClient(account_url=self.endpoint, credential=DefaultAzureCredential())
+        self.container_client = self.blob_service_client.get_container_client(self.container_name)
 
     def upload_file(
         self, file: BinaryIO, filename: str, tags: Dict[str, str]

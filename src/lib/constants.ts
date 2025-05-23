@@ -1,11 +1,21 @@
 import { browser, dev } from '$app/environment';
 // import { version } from '../../package.json';
 
-export const APP_NAME = 'Open WebUI';
+export const APP_NAME = 'CSEI-GPT';
 
+// Normal mode
+// export const WEBUI_HOSTNAME = browser ? (dev ? `${location.hostname}:18080` : ``) : '';
+// export const MODE_TYPE = 'normal';
+// Guest mode
 export const WEBUI_HOSTNAME = browser ? (dev ? `${location.hostname}:28080` : ``) : '';
+export const MODE_TYPE = 'guest';
+
+
 export const WEBUI_BASE_URL = browser ? (dev ? `http://${WEBUI_HOSTNAME}` : ``) : ``;
 export const WEBUI_API_BASE_URL = `${WEBUI_BASE_URL}/api/v1`;
+
+
+console.log(WEBUI_BASE_URL);
 
 export const OLLAMA_API_BASE_URL = `${WEBUI_BASE_URL}/ollama`;
 export const OPENAI_API_BASE_URL = `${WEBUI_BASE_URL}/openai`;

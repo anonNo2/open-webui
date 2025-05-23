@@ -43,10 +43,7 @@ if USE_CUDA.lower() == "true":
         assert torch.cuda.is_available(), "CUDA not available"
         DEVICE_TYPE = "cuda"
     except Exception as e:
-        cuda_error = (
-            "Error when testing CUDA but USE_CUDA_DOCKER is true. "
-            f"Resetting USE_CUDA_DOCKER to false: {e}"
-        )
+        cuda_error = "Error when testing CUDA but USE_CUDA_DOCKER is true. " f"Resetting USE_CUDA_DOCKER to false: {e}"
         os.environ["USE_CUDA_DOCKER"] = "false"
         USE_CUDA = "false"
         DEVICE_TYPE = "cpu"
@@ -250,6 +247,7 @@ if FROM_INIT_PY:
         os.getenv("FRONTEND_BUILD_DIR", OPEN_WEBUI_DIR / "frontend")
     ).resolve()
 
+
 ####################################
 # Database
 ####################################
@@ -310,9 +308,7 @@ else:
     except Exception:
         DATABASE_POOL_RECYCLE = 3600
 
-RESET_CONFIG_ON_START = (
-    os.environ.get("RESET_CONFIG_ON_START", "False").lower() == "true"
-)
+RESET_CONFIG_ON_START = os.environ.get("RESET_CONFIG_ON_START", "False").lower() == "true"
 
 ENABLE_REALTIME_CHAT_SAVE = (
     os.environ.get("ENABLE_REALTIME_CHAT_SAVE", "False").lower() == "true"
@@ -345,14 +341,14 @@ except ValueError:
 ####################################
 
 WEBUI_AUTH = os.environ.get("WEBUI_AUTH", "True").lower() == "true"
-WEBUI_AUTH_TRUSTED_EMAIL_HEADER = os.environ.get(
-    "WEBUI_AUTH_TRUSTED_EMAIL_HEADER", None
-)
+WEBUI_AUTH_TRUSTED_EMAIL_HEADER = os.environ.get("WEBUI_AUTH_TRUSTED_EMAIL_HEADER", None)
 WEBUI_AUTH_TRUSTED_NAME_HEADER = os.environ.get("WEBUI_AUTH_TRUSTED_NAME_HEADER", None)
 
-BYPASS_MODEL_ACCESS_CONTROL = (
-    os.environ.get("BYPASS_MODEL_ACCESS_CONTROL", "False").lower() == "true"
-)
+BYPASS_MODEL_ACCESS_CONTROL = os.environ.get("BYPASS_MODEL_ACCESS_CONTROL", "False").lower() == "true"
+
+# 访客模式配置（访客可使用的模型）
+GUEST_ENABLE_MODEL = os.environ.get("GUEST_ENABLE_MODEL", "")
+ENABLE_AUTO_AUTH = os.environ.get("ENABLE_AUTO_AUTH", "True").lower() == "true"
 
 WEBUI_AUTH_SIGNOUT_REDIRECT_URL = os.environ.get(
     "WEBUI_AUTH_SIGNOUT_REDIRECT_URL", None
@@ -364,20 +360,14 @@ WEBUI_AUTH_SIGNOUT_REDIRECT_URL = os.environ.get(
 
 WEBUI_SECRET_KEY = os.environ.get(
     "WEBUI_SECRET_KEY",
-    os.environ.get(
-        "WEBUI_JWT_SECRET_KEY", "t0p-s3cr3t"
-    ),  # DEPRECATED: remove at next major version
+    os.environ.get("WEBUI_JWT_SECRET_KEY", "t0p-s3cr3t"),  # DEPRECATED: remove at next major version
 )
 
 WEBUI_SESSION_COOKIE_SAME_SITE = os.environ.get("WEBUI_SESSION_COOKIE_SAME_SITE", "lax")
 
-WEBUI_SESSION_COOKIE_SECURE = (
-    os.environ.get("WEBUI_SESSION_COOKIE_SECURE", "false").lower() == "true"
-)
+WEBUI_SESSION_COOKIE_SECURE = os.environ.get("WEBUI_SESSION_COOKIE_SECURE", "false").lower() == "true"
 
-WEBUI_AUTH_COOKIE_SAME_SITE = os.environ.get(
-    "WEBUI_AUTH_COOKIE_SAME_SITE", WEBUI_SESSION_COOKIE_SAME_SITE
-)
+WEBUI_AUTH_COOKIE_SAME_SITE = os.environ.get("WEBUI_AUTH_COOKIE_SAME_SITE", WEBUI_SESSION_COOKIE_SAME_SITE)
 
 WEBUI_AUTH_COOKIE_SECURE = (
     os.environ.get(
@@ -390,9 +380,7 @@ WEBUI_AUTH_COOKIE_SECURE = (
 if WEBUI_AUTH and WEBUI_SECRET_KEY == "":
     raise ValueError(ERROR_MESSAGES.ENV_VAR_NOT_FOUND)
 
-ENABLE_WEBSOCKET_SUPPORT = (
-    os.environ.get("ENABLE_WEBSOCKET_SUPPORT", "True").lower() == "true"
-)
+ENABLE_WEBSOCKET_SUPPORT = os.environ.get("ENABLE_WEBSOCKET_SUPPORT", "True").lower() == "true"
 
 WEBSOCKET_MANAGER = os.environ.get("WEBSOCKET_MANAGER", "")
 
@@ -521,9 +509,7 @@ except ValueError:
     MAX_BODY_LOG_SIZE = 2048
 
 # Comma separated list for urls to exclude from audit
-AUDIT_EXCLUDED_PATHS = os.getenv("AUDIT_EXCLUDED_PATHS", "/chats,/chat,/folders").split(
-    ","
-)
+AUDIT_EXCLUDED_PATHS = os.getenv("AUDIT_EXCLUDED_PATHS", "/chats,/chat,/folders").split(",")
 AUDIT_EXCLUDED_PATHS = [path.strip() for path in AUDIT_EXCLUDED_PATHS]
 AUDIT_EXCLUDED_PATHS = [path.lstrip("/") for path in AUDIT_EXCLUDED_PATHS]
 

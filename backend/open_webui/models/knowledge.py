@@ -100,9 +100,7 @@ class KnowledgeForm(BaseModel):
 
 
 class KnowledgeTable:
-    def insert_new_knowledge(
-        self, user_id: str, form_data: KnowledgeForm
-    ) -> Optional[KnowledgeModel]:
+    def insert_new_knowledge(self, user_id: str, form_data: KnowledgeForm) -> Optional[KnowledgeModel]:
         with get_db() as db:
             knowledge = KnowledgeModel(
                 **{
@@ -129,9 +127,7 @@ class KnowledgeTable:
     def get_knowledge_bases(self) -> list[KnowledgeUserModel]:
         with get_db() as db:
             knowledge_bases = []
-            for knowledge in (
-                db.query(Knowledge).order_by(Knowledge.updated_at.desc()).all()
-            ):
+            for knowledge in db.query(Knowledge).order_by(Knowledge.updated_at.desc()).all():
                 user = Users.get_user_by_id(knowledge.user_id)
                 knowledge_bases.append(
                     KnowledgeUserModel.model_validate(
@@ -143,15 +139,12 @@ class KnowledgeTable:
                 )
             return knowledge_bases
 
-    def get_knowledge_bases_by_user_id(
-        self, user_id: str, permission: str = "write"
-    ) -> list[KnowledgeUserModel]:
+    def get_knowledge_bases_by_user_id(self, user_id: str, permission: str = "write") -> list[KnowledgeUserModel]:
         knowledge_bases = self.get_knowledge_bases()
         return [
             knowledge_base
             for knowledge_base in knowledge_bases
-            if knowledge_base.user_id == user_id
-            or has_access(user_id, permission, knowledge_base.access_control)
+            if knowledge_base.user_id == user_id or has_access(user_id, permission, knowledge_base.access_control)
         ]
 
     def get_knowledge_by_id(self, id: str) -> Optional[KnowledgeModel]:
@@ -180,9 +173,7 @@ class KnowledgeTable:
             log.exception(e)
             return None
 
-    def update_knowledge_data_by_id(
-        self, id: str, data: dict
-    ) -> Optional[KnowledgeModel]:
+    def update_knowledge_data_by_id(self, id: str, data: dict) -> Optional[KnowledgeModel]:
         try:
             with get_db() as db:
                 knowledge = self.get_knowledge_by_id(id=id)

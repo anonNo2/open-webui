@@ -1102,6 +1102,7 @@
 	"Sign in": "Logg inn",
 	"Sign in to {{WEBUI_NAME}}": "Logg på {{WEBUI_NAME}}",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "Logg på {{WEBUI_NAME}} med LDAP",
+	"Sign In(authenticated)": "Logg inn (autentisert)",
 	"Sign Out": "Logg ut",
 	"Sign up": "Registrer deg",
 	"Sign up to {{WEBUI_NAME}}": "Registrer deg for {{WEBUI_NAME}}",

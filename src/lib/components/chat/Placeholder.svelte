@@ -38,6 +38,9 @@
 
 	export let imageGenerationEnabled = false;
 	export let codeInterpreterEnabled = false;
+	export let knowledgeBaseEnabled = false;
+	export let deepWebSearchEnabled = false;
+	export let deepResearchEnabled = false;
 	export let webSearchEnabled = false;
 
 	export let toolServers = [];
@@ -139,11 +142,12 @@
 				</div>
 
 				<div class=" text-3xl @sm:text-4xl line-clamp-1" in:fade={{ duration: 100 }}>
-					{#if models[selectedModelIdx]?.name}
+					<!-- {#if models[selectedModelIdx]?.name}
 						{models[selectedModelIdx]?.name}
 					{:else}
-						{$i18n.t('Hello, {{name}}', { name: $user?.name })}
-					{/if}
+						{$i18n.t('Hello, {{name}}', { name: $user.name })}
+					{/if} -->
+					特种设备智能问答
 				</div>
 			</div>
 
@@ -186,7 +190,7 @@
 				</div>
 			</div>
 
-			<div class="text-base font-normal @md:max-w-3xl w-full py-3 {atSelectedModel ? 'mt-2' : ''}">
+			<div class="text-base font-normal @md:max-w-3xl w-full py-8 min-h-[200px] {atSelectedModel ? 'mt-2' : ''}">
 				<MessageInput
 					{history}
 					{selectedModels}
@@ -197,6 +201,9 @@
 					bind:selectedFilterIds
 					bind:imageGenerationEnabled
 					bind:codeInterpreterEnabled
+					bind:knowledgeBaseEnabled
+					bind:deepWebSearchEnabled
+					bind:deepResearchEnabled
 					bind:webSearchEnabled
 					bind:atSelectedModel
 					{toolServers}

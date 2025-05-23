@@ -1,7 +1,7 @@
 import logging
 import time
 import uuid
-from typing import Optional
+from typing import Optional, List
 
 from open_webui.internal.db import Base, get_db
 from open_webui.models.chats import Chats
@@ -67,6 +67,7 @@ class RatingData(BaseModel):
     model_id: Optional[str] = None
     sibling_model_ids: Optional[list[str]] = None
     reason: Optional[str] = None
+    reasons: Optional[List[str]] = None
     comment: Optional[str] = None
     model_config = ConfigDict(extra="allow", protected_namespaces=())
 
@@ -93,9 +94,7 @@ class FeedbackForm(BaseModel):
 
 
 class FeedbackTable:
-    def insert_new_feedback(
-        self, user_id: str, form_data: FeedbackForm
-    ) -> Optional[FeedbackModel]:
+    def insert_new_feedback(self, user_id: str, form_data: FeedbackForm) -> Optional[FeedbackModel]:
         with get_db() as db:
             id = str(uuid.uuid4())
             feedback = FeedbackModel(
@@ -131,9 +130,7 @@ class FeedbackTable:
         except Exception:
             return None
 
-    def get_feedback_by_id_and_user_id(
-        self, id: str, user_id: str
-    ) -> Optional[FeedbackModel]:
+    def get_feedback_by_id_and_user_id(self, id: str, user_id: str) -> Optional[FeedbackModel]:
         try:
             with get_db() as db:
                 feedback = db.query(Feedback).filter_by(id=id, user_id=user_id).first()
@@ -147,34 +144,24 @@ class FeedbackTable:
         with get_db() as db:
             return [
                 FeedbackModel.model_validate(feedback)
-                for feedback in db.query(Feedback)
-                .order_by(Feedback.updated_at.desc())
-                .all()
+                for feedback in db.query(Feedback).order_by(Feedback.updated_at.desc()).all()
             ]
 
     def get_feedbacks_by_type(self, type: str) -> list[FeedbackModel]:
         with get_db() as db:
             return [
                 FeedbackModel.model_validate(feedback)
-                for feedback in db.query(Feedback)
-                .filter_by(type=type)
-                .order_by(Feedback.updated_at.desc())
-                .all()
+                for feedback in db.query(Feedback).filter_by(type=type).order_by(Feedback.updated_at.desc()).all()
             ]
 
     def get_feedbacks_by_user_id(self, user_id: str) -> list[FeedbackModel]:
         with get_db() as db:
             return [
                 FeedbackModel.model_validate(feedback)
-                for feedback in db.query(Feedback)
-                .filter_by(user_id=user_id)
-                .order_by(Feedback.updated_at.desc())
-                .all()
+                for feedback in db.query(Feedback).filter_by(user_id=user_id).order_by(Feedback.updated_at.desc()).all()
             ]
 
-    def update_feedback_by_id(
-        self, id: str, form_data: FeedbackForm
-    ) -> Optional[FeedbackModel]:
+    def update_feedback_by_id(self, id: str, form_data: FeedbackForm) -> Optional[FeedbackModel]:
         with get_db() as db:
             feedback = db.query(Feedback).filter_by(id=id).first()
             if not feedback:

@@ -52,16 +52,11 @@ async def get_knowledge(user=Depends(get_verified_user)):
     for knowledge_base in knowledge_bases:
         files = []
         if knowledge_base.data:
-            files = Files.get_file_metadatas_by_ids(
-                knowledge_base.data.get("file_ids", [])
-            )
+            files = Files.get_file_metadatas_by_ids(knowledge_base.data.get("file_ids", []))
 
             # Check if all files exist
             if len(files) != len(knowledge_base.data.get("file_ids", [])):
-                missing_files = list(
-                    set(knowledge_base.data.get("file_ids", []))
-                    - set([file.id for file in files])
-                )
+                missing_files = list(set(knowledge_base.data.get("file_ids", [])) - set([file.id for file in files]))
                 if missing_files:
                     data = knowledge_base.data or {}
                     file_ids = data.get("file_ids", [])
@@ -70,9 +65,7 @@ async def get_knowledge(user=Depends(get_verified_user)):
                         file_ids.remove(missing_file)
 
                     data["file_ids"] = file_ids
-                    Knowledges.update_knowledge_data_by_id(
-                        id=knowledge_base.id, data=data
-                    )
+                    Knowledges.update_knowledge_data_by_id(id=knowledge_base.id, data=data)
 
                     files = Files.get_file_metadatas_by_ids(file_ids)
 
@@ -100,16 +93,11 @@ async def get_knowledge_list(user=Depends(get_verified_user)):
     for knowledge_base in knowledge_bases:
         files = []
         if knowledge_base.data:
-            files = Files.get_file_metadatas_by_ids(
-                knowledge_base.data.get("file_ids", [])
-            )
+            files = Files.get_file_metadatas_by_ids(knowledge_base.data.get("file_ids", []))
 
             # Check if all files exist
             if len(files) != len(knowledge_base.data.get("file_ids", [])):
-                missing_files = list(
-                    set(knowledge_base.data.get("file_ids", []))
-                    - set([file.id for file in files])
-                )
+                missing_files = list(set(knowledge_base.data.get("file_ids", [])) - set([file.id for file in files]))
                 if missing_files:
                     data = knowledge_base.data or {}
                     file_ids = data.get("file_ids", [])
@@ -118,9 +106,7 @@ async def get_knowledge_list(user=Depends(get_verified_user)):
                         file_ids.remove(missing_file)
 
                     data["file_ids"] = file_ids
-                    Knowledges.update_knowledge_data_by_id(
-                        id=knowledge_base.id, data=data
-                    )
+                    Knowledges.update_knowledge_data_by_id(id=knowledge_base.id, data=data)
 
                     files = Files.get_file_metadatas_by_ids(file_ids)
 
@@ -139,9 +125,7 @@ async def get_knowledge_list(user=Depends(get_verified_user)):
 
 
 @router.post("/create", response_model=Optional[KnowledgeResponse])
-async def create_new_knowledge(
-    request: Request, form_data: KnowledgeForm, user=Depends(get_verified_user)
-):
+async def create_new_knowledge(request: Request, form_data: KnowledgeForm, user=Depends(get_verified_user)):
     if user.role != "admin" and not has_permission(
         user.id, "workspace.knowledge", request.app.state.config.USER_PERMISSIONS
     ):
@@ -448,9 +432,7 @@ def update_file_from_knowledge_by_id(
         )
 
     # Remove content from the vector database
-    VECTOR_DB_CLIENT.delete(
-        collection_name=knowledge.id, filter={"file_id": form_data.file_id}
-    )
+    VECTOR_DB_CLIENT.delete(collection_name=knowledge.id, filter={"file_id": form_data.file_id})
 
     # Add content to the vector database
     try:
@@ -724,9 +706,7 @@ def add_files_to_knowledge_batch(
             user=user,
         )
     except Exception as e:
-        log.error(
-            f"add_files_to_knowledge_batch: Exception occurred: {e}", exc_info=True
-        )
+        log.error(f"add_files_to_knowledge_batch: Exception occurred: {e}", exc_info=True)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
     # Add successful files to knowledge base
@@ -754,7 +734,5 @@ def add_files_to_knowledge_batch(
             },
         )
 
-    return KnowledgeFilesResponse(
-        **knowledge.model_dump(),
-        files=Files.get_file_metadatas_by_ids(existing_file_ids),
-    )
+    return KnowledgeFilesResponse(**knowledge.model_dump(),
+        files=Files.get_file_metadatas_by_ids(existing_file_ids),)

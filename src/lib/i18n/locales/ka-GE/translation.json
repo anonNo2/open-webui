@@ -1102,6 +1102,7 @@
 	"Sign in": "შესვლა",
 	"Sign in to {{WEBUI_NAME}}": "",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "",
+	"Sign In(authenticated)": "შესვლა (გადამოწმებული)",
 	"Sign Out": "გასვლა",
 	"Sign up": "რეგისტრაცია",
 	"Sign up to {{WEBUI_NAME}}": "",

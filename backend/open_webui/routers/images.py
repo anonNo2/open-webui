@@ -98,32 +98,20 @@ class ConfigForm(BaseModel):
 
 
 @router.post("/config/update")
-async def update_config(
-    request: Request, form_data: ConfigForm, user=Depends(get_admin_user)
-):
+async def update_config(request: Request, form_data: ConfigForm, user=Depends(get_admin_user)):
     request.app.state.config.IMAGE_GENERATION_ENGINE = form_data.engine
     request.app.state.config.ENABLE_IMAGE_GENERATION = form_data.enabled
 
-    request.app.state.config.ENABLE_IMAGE_PROMPT_GENERATION = (
-        form_data.prompt_generation
-    )
+    request.app.state.config.ENABLE_IMAGE_PROMPT_GENERATION = form_data.prompt_generation
 
-    request.app.state.config.IMAGES_OPENAI_API_BASE_URL = (
-        form_data.openai.OPENAI_API_BASE_URL
-    )
+    request.app.state.config.IMAGES_OPENAI_API_BASE_URL = form_data.openai.OPENAI_API_BASE_URL
     request.app.state.config.IMAGES_OPENAI_API_KEY = form_data.openai.OPENAI_API_KEY
 
-    request.app.state.config.IMAGES_GEMINI_API_BASE_URL = (
-        form_data.gemini.GEMINI_API_BASE_URL
-    )
+    request.app.state.config.IMAGES_GEMINI_API_BASE_URL = form_data.gemini.GEMINI_API_BASE_URL
     request.app.state.config.IMAGES_GEMINI_API_KEY = form_data.gemini.GEMINI_API_KEY
 
-    request.app.state.config.AUTOMATIC1111_BASE_URL = (
-        form_data.automatic1111.AUTOMATIC1111_BASE_URL
-    )
-    request.app.state.config.AUTOMATIC1111_API_AUTH = (
-        form_data.automatic1111.AUTOMATIC1111_API_AUTH
-    )
+    request.app.state.config.AUTOMATIC1111_BASE_URL = form_data.automatic1111.AUTOMATIC1111_BASE_URL
+    request.app.state.config.AUTOMATIC1111_API_AUTH = form_data.automatic1111.AUTOMATIC1111_API_AUTH
 
     request.app.state.config.AUTOMATIC1111_CFG_SCALE = (
         float(form_data.automatic1111.AUTOMATIC1111_CFG_SCALE)
@@ -131,25 +119,17 @@ async def update_config(
         else None
     )
     request.app.state.config.AUTOMATIC1111_SAMPLER = (
-        form_data.automatic1111.AUTOMATIC1111_SAMPLER
-        if form_data.automatic1111.AUTOMATIC1111_SAMPLER
-        else None
+        form_data.automatic1111.AUTOMATIC1111_SAMPLER if form_data.automatic1111.AUTOMATIC1111_SAMPLER else None
     )
     request.app.state.config.AUTOMATIC1111_SCHEDULER = (
-        form_data.automatic1111.AUTOMATIC1111_SCHEDULER
-        if form_data.automatic1111.AUTOMATIC1111_SCHEDULER
-        else None
+        form_data.automatic1111.AUTOMATIC1111_SCHEDULER if form_data.automatic1111.AUTOMATIC1111_SCHEDULER else None
     )
 
-    request.app.state.config.COMFYUI_BASE_URL = (
-        form_data.comfyui.COMFYUI_BASE_URL.strip("/")
-    )
+    request.app.state.config.COMFYUI_BASE_URL = form_data.comfyui.COMFYUI_BASE_URL.strip("/")
     request.app.state.config.COMFYUI_API_KEY = form_data.comfyui.COMFYUI_API_KEY
 
     request.app.state.config.COMFYUI_WORKFLOW = form_data.comfyui.COMFYUI_WORKFLOW
-    request.app.state.config.COMFYUI_WORKFLOW_NODES = (
-        form_data.comfyui.COMFYUI_WORKFLOW_NODES
-    )
+    request.app.state.config.COMFYUI_WORKFLOW_NODES = form_data.comfyui.COMFYUI_WORKFLOW_NODES
 
     return {
         "enabled": request.app.state.config.ENABLE_IMAGE_GENERATION,
@@ -183,9 +163,7 @@ def get_automatic1111_api_auth(request: Request):
     if request.app.state.config.AUTOMATIC1111_API_AUTH is None:
         return ""
     else:
-        auth1111_byte_string = request.app.state.config.AUTOMATIC1111_API_AUTH.encode(
-            "utf-8"
-        )
+        auth1111_byte_string = request.app.state.config.AUTOMATIC1111_API_AUTH.encode("utf-8")
         auth1111_base64_encoded_bytes = base64.b64encode(auth1111_byte_string)
         auth1111_base64_encoded_string = auth1111_base64_encoded_bytes.decode("utf-8")
         return f"Basic {auth1111_base64_encoded_string}"
@@ -208,9 +186,7 @@ async def verify_url(request: Request, user=Depends(get_admin_user)):
 
         headers = None
         if request.app.state.config.COMFYUI_API_KEY:
-            headers = {
-                "Authorization": f"Bearer {request.app.state.config.COMFYUI_API_KEY}"
-            }
+            headers = {"Authorization": f"Bearer {request.app.state.config.COMFYUI_API_KEY}"}
 
         try:
             r = requests.get(
@@ -261,9 +237,7 @@ def get_image_model(request):
         )
     elif request.app.state.config.IMAGE_GENERATION_ENGINE == "comfyui":
         return (
-            request.app.state.config.IMAGE_GENERATION_MODEL
-            if request.app.state.config.IMAGE_GENERATION_MODEL
-            else ""
+            request.app.state.config.IMAGE_GENERATION_MODEL if request.app.state.config.IMAGE_GENERATION_MODEL else ""
         )
     elif (
         request.app.state.config.IMAGE_GENERATION_ENGINE == "automatic1111"
@@ -297,9 +271,7 @@ async def get_image_config(request: Request, user=Depends(get_admin_user)):
 
 
 @router.post("/image/config/update")
-async def update_image_config(
-    request: Request, form_data: ImageConfigForm, user=Depends(get_admin_user)
-):
+async def update_image_config(request: Request, form_data: ImageConfigForm, user=Depends(get_admin_user)):
     set_image_model(request, form_data.MODEL)
 
     pattern = r"^\d+x\d+$"
@@ -340,9 +312,7 @@ def get_models(request: Request, user=Depends(get_verified_user)):
             ]
         elif request.app.state.config.IMAGE_GENERATION_ENGINE == "comfyui":
             # TODO - get models from comfyui
-            headers = {
-                "Authorization": f"Bearer {request.app.state.config.COMFYUI_API_KEY}"
-            }
+            headers = {"Authorization": f"Bearer {request.app.state.config.COMFYUI_API_KEY}"}
             r = requests.get(
                 url=f"{request.app.state.config.COMFYUI_BASE_URL}/object_info",
                 headers=headers,
@@ -362,9 +332,7 @@ def get_models(request: Request, user=Depends(get_verified_user)):
                 model_list_key = None
 
                 log.info(workflow[model_node_id]["class_type"])
-                for key in info[workflow[model_node_id]["class_type"]]["input"][
-                    "required"
-                ]:
+                for key in info[workflow[model_node_id]["class_type"]]["input"]["required"]:
                     if "_name" in key:
                         model_list_key = key
                         break
@@ -373,18 +341,14 @@ def get_models(request: Request, user=Depends(get_verified_user)):
                     return list(
                         map(
                             lambda model: {"id": model, "name": model},
-                            info[workflow[model_node_id]["class_type"]]["input"][
-                                "required"
-                            ][model_list_key][0],
+                            info[workflow[model_node_id]["class_type"]]["input"]["required"][model_list_key][0],
                         )
                     )
             else:
                 return list(
                     map(
                         lambda model: {"id": model, "name": model},
-                        info["CheckpointLoaderSimple"]["input"]["required"][
-                            "ckpt_name"
-                        ][0],
+                        info["CheckpointLoaderSimple"]["input"]["required"]["ckpt_name"][0],
                     )
                 )
         elif (
@@ -476,9 +440,7 @@ async def image_generations(
     try:
         if request.app.state.config.IMAGE_GENERATION_ENGINE == "openai":
             headers = {}
-            headers["Authorization"] = (
-                f"Bearer {request.app.state.config.IMAGES_OPENAI_API_KEY}"
-            )
+            headers["Authorization"] = f"Bearer {request.app.state.config.IMAGES_OPENAI_API_KEY}"
             headers["Content-Type"] = "application/json"
 
             if ENABLE_FORWARD_USER_INFO_HEADERS:
@@ -495,11 +457,7 @@ async def image_generations(
                 ),
                 "prompt": form_data.prompt,
                 "n": form_data.n,
-                "size": (
-                    form_data.size
-                    if form_data.size
-                    else request.app.state.config.IMAGE_SIZE
-                ),
+                "size": (form_data.size if form_data.size else request.app.state.config.IMAGE_SIZE),
                 **(
                     {}
                     if "gpt-image-1" in request.app.state.config.IMAGE_GENERATION_MODEL
@@ -557,9 +515,7 @@ async def image_generations(
 
             images = []
             for image in res["predictions"]:
-                image_data, content_type = load_b64_image_data(
-                    image["bytesBase64Encoded"]
-                )
+                image_data, content_type = load_b64_image_data(image["bytesBase64Encoded"])
                 url = upload_image(request, data, image_data, content_type, user)
                 images.append({"url": url})
 
@@ -604,9 +560,7 @@ async def image_generations(
             for image in res["data"]:
                 headers = None
                 if request.app.state.config.COMFYUI_API_KEY:
-                    headers = {
-                        "Authorization": f"Bearer {request.app.state.config.COMFYUI_API_KEY}"
-                    }
+                    headers = {"Authorization": f"Bearer {request.app.state.config.COMFYUI_API_KEY}"}
 
                 image_data, content_type = load_url_image_data(image["url"], headers)
                 url = upload_image(

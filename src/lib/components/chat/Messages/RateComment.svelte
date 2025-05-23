@@ -13,29 +13,26 @@
 	export let show = false;
 
 	let LIKE_REASONS = [
-		'accurate_information',
-		'followed_instructions_perfectly',
-		'showcased_creativity',
-		'positive_attitude',
-		'attention_to_detail',
-		'thorough_explanation',
+		'accurate_model_response',
+		'accurate_regulation_retrieval',
+		'effective_thinking_process',
 		'other'
 	];
 	let DISLIKE_REASONS = [
-		'dont_like_the_style',
-		'too_verbose',
-		'not_helpful',
-		'not_factually_correct',
-		'didnt_fully_follow_instructions',
-		'refused_when_it_shouldnt_have',
-		'being_lazy',
+		'contains_partial_correct_answer_no_extra',
+		'contains_full_correct_answer_with_extra',
+		'contains_partial_correct_answer_with_extra',
+		'contains_no_correct_answer',
+		'inaccurate_regulation_retrieval',
+		'misunderstood_question',
+		'incorrect_answer_format',
 		'other'
 	];
 
 	let tags = [];
 
 	let reasons = [];
-	let selectedReason = null;
+	let selectedReasons = [];
 	let comment = '';
 
 	let detailedRating = null;
@@ -52,8 +49,14 @@
 	}
 
 	const init = () => {
-		if (!selectedReason) {
-			selectedReason = message?.annotation?.reason ?? '';
+		if (message?.annotation?.reasons) {
+			selectedReasons = Array.isArray(message.annotation.reasons) 
+				? message.annotation.reasons 
+				: [message.annotation.reason];
+		} else if (message?.annotation?.reason) {
+			selectedReasons = [message.annotation.reason];
+		} else {
+			selectedReasons = [];
 		}
 
 		if (!comment) {
@@ -80,15 +83,20 @@
 		}
 	});
 
+	const toggleReason = (reason) => {
+		const index = selectedReasons.indexOf(reason);
+		if (index === -1) {
+			selectedReasons = [...selectedReasons, reason];
+		} else {
+			selectedReasons = selectedReasons.filter(r => r !== reason);
+		}
+	};
+
 	const saveHandler = () => {
-		console.log('saveHandler');
-		// if (!selectedReason) {
-		// 	toast.error($i18n.t('Please select a reason'));
-		// 	return;
-		// }
+		console.log('saveHandler', selectedReasons);
 
 		dispatch('save', {
-			reason: selectedReason,
+			reasons: selectedReasons,
 			comment: comment,
 			tags: tags.map((tag) => tag.name),
 			details: {
@@ -115,8 +123,6 @@
 >
 	<div class="flex justify-between items-center">
 		<div class="text-sm font-medium">{$i18n.t('How would you rate this response?')}</div>
-
-		<!-- <div class=" text-sm">{$i18n.t('Tell us more:')}</div> -->
 
 		<button
 			on:click={() => {
@@ -170,45 +176,36 @@
 
 	<div>
 		{#if reasons.length > 0}
-			<div class="text-sm mt-1.5 font-medium">{$i18n.t('Why?')}</div>
+			<div class="text-sm mt-1.5 font-medium">{$i18n.t('Why?')} ({$i18n.t('Select all that apply')})</div>
 
 			<div class="flex flex-wrap gap-1.5 text-sm mt-1.5">
 				{#each reasons as reason}
 					<button
-						class="px-3 py-0.5 border border-gray-100 dark:border-gray-850 hover:bg-gray-50 dark:hover:bg-gray-850 {selectedReason ===
-						reason
+						class="px-3 py-0.5 border border-gray-100 dark:border-gray-850 hover:bg-gray-50 dark:hover:bg-gray-850 {selectedReasons.includes(reason)
 							? 'bg-gray-100 dark:bg-gray-800'
 							: ''} transition rounded-xl"
-						on:click={() => {
-							selectedReason = reason;
-						}}
+						on:click={() => toggleReason(reason)}
 					>
-						{#if reason === 'accurate_information'}
-							{$i18n.t('Accurate information')}
-						{:else if reason === 'followed_instructions_perfectly'}
-							{$i18n.t('Followed instructions perfectly')}
-						{:else if reason === 'showcased_creativity'}
-							{$i18n.t('Showcased creativity')}
-						{:else if reason === 'positive_attitude'}
-							{$i18n.t('Positive attitude')}
-						{:else if reason === 'attention_to_detail'}
-							{$i18n.t('Attention to detail')}
-						{:else if reason === 'thorough_explanation'}
-							{$i18n.t('Thorough explanation')}
-						{:else if reason === 'dont_like_the_style'}
-							{$i18n.t("Don't like the style")}
-						{:else if reason === 'too_verbose'}
-							{$i18n.t('Too verbose')}
-						{:else if reason === 'not_helpful'}
-							{$i18n.t('Not helpful')}
-						{:else if reason === 'not_factually_correct'}
-							{$i18n.t('Not factually correct')}
-						{:else if reason === 'didnt_fully_follow_instructions'}
-							{$i18n.t("Didn't fully follow instructions")}
-						{:else if reason === 'refused_when_it_shouldnt_have'}
-							{$i18n.t("Refused when it shouldn't have")}
-						{:else if reason === 'being_lazy'}
-							{$i18n.t('Being lazy')}
+						{#if reason === 'accurate_model_response'}
+							{$i18n.t('Accurate model response')}
+						{:else if reason === 'accurate_regulation_retrieval'}
+							{$i18n.t('Accurate regulation retrieval')}
+						{:else if reason === 'effective_thinking_process'}
+							{$i18n.t('Effective thinking process')}
+						{:else if reason === 'contains_partial_correct_answer_no_extra'}
+							{$i18n.t('Contains partial correct answer, no extra content')}
+						{:else if reason === 'contains_full_correct_answer_with_extra'}
+							{$i18n.t('Contains full correct answer with extra content')}
+						{:else if reason === 'contains_partial_correct_answer_with_extra'}
+							{$i18n.t('Contains partial correct answer with extra content')}
+						{:else if reason === 'contains_no_correct_answer'}
+							{$i18n.t('Contains no correct answer')}
+						{:else if reason === 'inaccurate_regulation_retrieval'}
+							{$i18n.t('Inaccurate regulation retrieval')}
+						{:else if reason === 'misunderstood_question'}
+							{$i18n.t('Misunderstood the question')}
+						{:else if reason === 'incorrect_answer_format'}
+							{$i18n.t('Incorrect answer format')}
 						{:else if reason === 'other'}
 							{$i18n.t('Other')}
 						{:else}

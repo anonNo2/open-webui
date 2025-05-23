@@ -1,6 +1,8 @@
 import logging
 import uuid
-from typing import Optional
+import jwt
+from datetime import UTC, datetime, timedelta
+from typing import Optional, Union, List, Dict
 
 from open_webui.internal.db import Base, get_db
 from open_webui.models.users import UserModel, Users
@@ -8,9 +10,19 @@ from open_webui.env import SRC_LOG_LEVELS
 from pydantic import BaseModel
 from sqlalchemy import Boolean, Column, String, Text
 from open_webui.utils.auth import verify_password
+from open_webui.env import SRC_LOG_LEVELS, ENABLE_AUTO_AUTH, WEBUI_SECRET_KEY
+from fastapi import Request, HTTPException, status
+from open_webui.utils.misc import parse_duration
 
 log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["MODELS"])
+
+####################
+# GUEST MODE
+####################
+SESSION_SECRET = WEBUI_SECRET_KEY
+ALGORITHM = "HS256"
+
 
 ####################
 # DB MODEL
@@ -109,15 +121,11 @@ class AuthsTable:
 
             id = str(uuid.uuid4())
 
-            auth = AuthModel(
-                **{"id": id, "email": email, "password": password, "active": True}
-            )
+            auth = AuthModel(**{"id": id, "email": email, "password": password, "active": True})
             result = Auth(**auth.model_dump())
             db.add(result)
 
-            user = Users.insert_new_user(
-                id, name, email, profile_image_url, role, oauth_sub
-            )
+            user = Users.insert_new_user(id, name, email, profile_image_url, role, oauth_sub)
 
             db.commit()
             db.refresh(result)
@@ -155,23 +163,91 @@ class AuthsTable:
         except Exception:
             return False
 
-    def authenticate_user_by_trusted_header(self, email: str) -> Optional[UserModel]:
-        log.info(f"authenticate_user_by_trusted_header: {email}")
+    # Other Code
+    def auto_auth(self, request: Request):
+        log.debug("Starting auto auth process")
+
+        random_id = str(uuid.uuid4())[:8]
+        auto_email = f"auto_user_{random_id}@auto.local"
+        # 访客模式
+        auto_name = f"Guest {random_id}"
+
+        auto_password = str(uuid.uuid4())
+
         try:
-            with get_db() as db:
-                auth = db.query(Auth).filter_by(email=email, active=True).first()
-                if auth:
-                    user = Users.get_user_by_id(auth.id)
-                    return user
-        except Exception:
-            return None
+            log.info(f"Creating auto user with email: {auto_email}")
+
+            user = self.insert_new_auth(
+                email=auto_email,
+                password=auto_password,
+                name=auto_name,
+                role="user",
+            )
+
+            if not user:
+                log.error("Failed to create auto user")
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to create auto user",
+                )
+
+            log.info(f"Successfully created auto user with ID: {user.id}")
+
+            def create_token(data: dict, expires_delta: Union[timedelta, None] = None) -> str:
+                payload = data.copy()
+
+                if expires_delta:
+                    expire = datetime.now(UTC) + expires_delta
+                    payload.update({"exp": expire})
+
+                encoded_jwt = jwt.encode(payload, SESSION_SECRET, algorithm=ALGORITHM)
+                return encoded_jwt
+
+            token = create_token(
+                data={"id": user.id},
+                expires_delta=parse_duration("-1"),
+            )
+
+            return {
+                "status": True,
+                "token": token,
+                "user": {
+                    "id": user.id,
+                    "name": user.name,
+                    "email": user.email,
+                    "role": user.role,
+                },
+            }
+        except Exception as e:
+            log.exception(f"Auto auth failed: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Auto auth failed: {str(e)}",
+            )
+
+    def authenticate_user_by_trusted_header(self, request: Request) -> Optional[UserModel]:
+        # log.info(f"authenticate_user_by_trusted_header: {email}")
+        # try:
+        #     with get_db() as db:
+        #         auth = db.query(Auth).filter_by(email=email, active=True).first()
+        #         if auth:
+        #             user = Users.get_user_by_id(auth.id)
+        #             return user
+        # except Exception:
+        #     return None
+        if ENABLE_AUTO_AUTH:
+            log.info("Auto auth enabled, creating new user")
+            auth_result = self.auto_auth(request)
+            if auth_result and auth_result["status"]:
+                user = Users.get_user_by_id(auth_result["user"]["id"])
+                log.info(f"Created new auto user: {user.id}")
+                return user
+        return None
 
     def update_user_password_by_id(self, id: str, new_password: str) -> bool:
         try:
             with get_db() as db:
-                result = (
-                    db.query(Auth).filter_by(id=id).update({"password": new_password})
-                )
+                result = db.query(Auth).filter_by(id=id).update({"password": new_password})
                 db.commit()
                 return True if result == 1 else False
         except Exception:

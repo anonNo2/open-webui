@@ -110,8 +110,8 @@ class SharingPermissions(BaseModel):
 
 
 class ChatPermissions(BaseModel):
-    controls: bool = True
-    file_upload: bool = True
+    controls: bool = False
+    file_upload: bool = False
     delete: bool = True
     edit: bool = True
     share: bool = True
@@ -253,9 +253,7 @@ async def get_user_info_by_session_user(user=Depends(get_verified_user)):
 
 
 @router.post("/user/info/update", response_model=Optional[dict])
-async def update_user_info_by_session_user(
-    form_data: dict, user=Depends(get_verified_user)
-):
+async def update_user_info_by_session_user(form_data: dict, user=Depends(get_verified_user)):
     user = Users.get_user_by_id(user.id)
     if user:
         if user.info is None:

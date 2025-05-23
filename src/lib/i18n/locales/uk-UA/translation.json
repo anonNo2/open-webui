@@ -1102,6 +1102,7 @@
 	"Sign in": "Увійти",
 	"Sign in to {{WEBUI_NAME}}": "Увійти в {{WEBUI_NAME}}",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "Увійти до {{WEBUI_NAME}} за допомогою LDAP",
+	"Sign In(authenticated)": "Увійти (авторизований)",
 	"Sign Out": "Вийти",
 	"Sign up": "Зареєструватися",
 	"Sign up to {{WEBUI_NAME}}": "Зареєструватися в {{WEBUI_NAME}}",

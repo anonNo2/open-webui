@@ -151,10 +151,7 @@ class FilesTable:
         with get_db() as db:
             return [
                 FileModel.model_validate(file)
-                for file in db.query(File)
-                .filter(File.id.in_(ids))
-                .order_by(File.updated_at.desc())
-                .all()
+                for file in db.query(File).filter(File.id.in_(ids)).order_by(File.updated_at.desc()).all()
             ]
 
     def get_file_metadatas_by_ids(self, ids: list[str]) -> list[FileMetadataResponse]:
@@ -166,18 +163,12 @@ class FilesTable:
                     created_at=file.created_at,
                     updated_at=file.updated_at,
                 )
-                for file in db.query(File)
-                .filter(File.id.in_(ids))
-                .order_by(File.updated_at.desc())
-                .all()
+                for file in db.query(File).filter(File.id.in_(ids)).order_by(File.updated_at.desc()).all()
             ]
 
     def get_files_by_user_id(self, user_id: str) -> list[FileModel]:
         with get_db() as db:
-            return [
-                FileModel.model_validate(file)
-                for file in db.query(File).filter_by(user_id=user_id).all()
-            ]
+            return [FileModel.model_validate(file) for file in db.query(File).filter_by(user_id=user_id).all()]
 
     def update_file_hash_by_id(self, id: str, hash: str) -> Optional[FileModel]:
         with get_db() as db:

@@ -1102,6 +1102,7 @@
 	"Sign in": "Prijava",
 	"Sign in to {{WEBUI_NAME}}": "",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "",
+	"Sign In(authenticated)": "Prijava (autentificirana)",
 	"Sign Out": "Odjava",
 	"Sign up": "Registracija",
 	"Sign up to {{WEBUI_NAME}}": "",

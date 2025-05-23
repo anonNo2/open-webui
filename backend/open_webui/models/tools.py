@@ -107,9 +107,7 @@ class ToolValves(BaseModel):
 
 
 class ToolsTable:
-    def insert_new_tool(
-        self, user_id: str, form_data: ToolForm, specs: list[dict]
-    ) -> Optional[ToolModel]:
+    def insert_new_tool(self, user_id: str, form_data: ToolForm, specs: list[dict]) -> Optional[ToolModel]:
         with get_db() as db:
             tool = ToolModel(
                 **{
@@ -157,16 +155,11 @@ class ToolsTable:
                 )
             return tools
 
-    def get_tools_by_user_id(
-        self, user_id: str, permission: str = "write"
-    ) -> list[ToolUserModel]:
+    def get_tools_by_user_id(self, user_id: str, permission: str = "write") -> list[ToolUserModel]:
         tools = self.get_tools()
 
         return [
-            tool
-            for tool in tools
-            if tool.user_id == user_id
-            or has_access(user_id, permission, tool.access_control)
+            tool for tool in tools if tool.user_id == user_id or has_access(user_id, permission, tool.access_control)
         ]
 
     def get_tool_valves_by_id(self, id: str) -> Optional[dict]:
@@ -181,17 +174,13 @@ class ToolsTable:
     def update_tool_valves_by_id(self, id: str, valves: dict) -> Optional[ToolValves]:
         try:
             with get_db() as db:
-                db.query(Tool).filter_by(id=id).update(
-                    {"valves": valves, "updated_at": int(time.time())}
-                )
+                db.query(Tool).filter_by(id=id).update({"valves": valves, "updated_at": int(time.time())})
                 db.commit()
                 return self.get_tool_by_id(id)
         except Exception:
             return None
 
-    def get_user_valves_by_id_and_user_id(
-        self, id: str, user_id: str
-    ) -> Optional[dict]:
+    def get_user_valves_by_id_and_user_id(self, id: str, user_id: str) -> Optional[dict]:
         try:
             user = Users.get_user_by_id(user_id)
             user_settings = user.settings.model_dump() if user.settings else {}
@@ -204,14 +193,10 @@ class ToolsTable:
 
             return user_settings["tools"]["valves"].get(id, {})
         except Exception as e:
-            log.exception(
-                f"Error getting user values by id {id} and user_id {user_id}: {e}"
-            )
+            log.exception(f"Error getting user values by id {id} and user_id {user_id}: {e}")
             return None
 
-    def update_user_valves_by_id_and_user_id(
-        self, id: str, user_id: str, valves: dict
-    ) -> Optional[dict]:
+    def update_user_valves_by_id_and_user_id(self, id: str, user_id: str, valves: dict) -> Optional[dict]:
         try:
             user = Users.get_user_by_id(user_id)
             user_settings = user.settings.model_dump() if user.settings else {}
@@ -229,17 +214,13 @@ class ToolsTable:
 
             return user_settings["tools"]["valves"][id]
         except Exception as e:
-            log.exception(
-                f"Error updating user valves by id {id} and user_id {user_id}: {e}"
-            )
+            log.exception(f"Error updating user valves by id {id} and user_id {user_id}: {e}")
             return None
 
     def update_tool_by_id(self, id: str, updated: dict) -> Optional[ToolModel]:
         try:
             with get_db() as db:
-                db.query(Tool).filter_by(id=id).update(
-                    {**updated, "updated_at": int(time.time())}
-                )
+                db.query(Tool).filter_by(id=id).update({**updated, "updated_at": int(time.time())})
                 db.commit()
 
                 tool = db.query(Tool).get(id)

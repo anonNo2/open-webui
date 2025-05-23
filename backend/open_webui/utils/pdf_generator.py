@@ -121,16 +121,12 @@ class PDFGenerator:
             pdf.add_font("Twemoji", "", f"{FONTS_DIR}/Twemoji.ttf")
 
             pdf.set_font("NotoSans", size=12)
-            pdf.set_fallback_fonts(
-                ["NotoSansKR", "NotoSansJP", "NotoSansSC", "Twemoji"]
-            )
+            pdf.set_fallback_fonts(["NotoSansKR", "NotoSansJP", "NotoSansSC", "Twemoji"])
 
             pdf.set_auto_page_break(auto=True, margin=15)
 
             # Build HTML messages
-            messages_html_list: List[str] = [
-                self._build_html_message(msg) for msg in self.form_data.messages
-            ]
+            messages_html_list: List[str] = [self._build_html_message(msg) for msg in self.form_data.messages]
             self.messages_html = "<div>" + "".join(messages_html_list) + "</div>"
 
             # Generate full HTML body

@@ -1,0 +1,16 @@
+# This is an overlay that spins up stable-diffusion-webui for integration testing
+# This is not designed to be used in production
+services:
+  
+
+  open-webui:
+    image: sribd-common/open-webui:main
+    environment:
+     HF_ENDPOINT: https://hf-mirror.com
+    volumes:
+      - /home/wuxiangbo/workspace/open-webui:/app/
+    ports:
+      - "18080:18080"
+      - "15173:5173"
+    command: bash /app/backend/start.sh
+    

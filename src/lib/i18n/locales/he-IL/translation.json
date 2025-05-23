@@ -1102,6 +1102,7 @@
 	"Sign in": "הירשם",
 	"Sign in to {{WEBUI_NAME}}": "",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "",
+	"Sign In(authenticated)": "התחברות (מאובטח)",
 	"Sign Out": "התנתקות",
 	"Sign up": "הרשמה",
 	"Sign up to {{WEBUI_NAME}}": "",

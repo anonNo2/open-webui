@@ -38,9 +38,7 @@ def upgrade():
 
             # Step 1: Rename current 'chat' column to 'old_chat'
             print("Renaming 'chat' column to 'old_chat'")
-            op.alter_column(
-                "chat", "chat", new_column_name="old_chat", existing_type=sa.Text()
-            )
+            op.alter_column("chat", "chat", new_column_name="old_chat", existing_type=sa.Text())
 
             # Step 2: Add new 'chat' column of type JSON
             print("Adding new 'chat' column of type JSON")
@@ -67,11 +65,7 @@ def upgrade():
         except json.JSONDecodeError:
             json_data = None  # Handle cases where the text cannot be converted to JSON
 
-        connection.execute(
-            sa.update(chat_table)
-            .where(chat_table.c.id == row.id)
-            .values(chat=json_data)
-        )
+        connection.execute(sa.update(chat_table).where(chat_table.c.id == row.id).values(chat=json_data))
 
     # Step 4: Drop 'old_chat' column
     print("Dropping 'old_chat' column")
@@ -94,11 +88,7 @@ def downgrade():
     results = connection.execute(select(chat_table.c.id, chat_table.c.chat))
     for row in results:
         text_data = json.dumps(row.chat) if row.chat is not None else None
-        connection.execute(
-            sa.update(chat_table)
-            .where(chat_table.c.id == row.id)
-            .values(old_chat=text_data)
-        )
+        connection.execute(sa.update(chat_table).where(chat_table.c.id == row.id).values(old_chat=text_data))
 
     # Step 3: Remove the new 'chat' JSON column
     op.drop_column("chat", "chat")

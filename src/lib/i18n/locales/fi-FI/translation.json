@@ -1102,6 +1102,7 @@
 	"Sign in": "Kirjaudu sisään",
 	"Sign in to {{WEBUI_NAME}}": "Kirjaudu sisään palveluun {{WEBUI_NAME}}",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "Kirjaudu sisään palveluun {{WEBUI_NAME}} LDAP:lla",
+	"Sign In(authenticated)": "Kirjaudu sisään (autentikoida)",
 	"Sign Out": "Kirjaudu ulos",
 	"Sign up": "Rekisteröidy",
 	"Sign up to {{WEBUI_NAME}}": "Rekisteröidy palveluun {{WEBUI_NAME}}",

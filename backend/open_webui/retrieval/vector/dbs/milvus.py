@@ -105,9 +105,7 @@ class MilvusClient(VectorDBBase):
             description="vector",
         )
         schema.add_field(field_name="data", datatype=DataType.JSON, description="data")
-        schema.add_field(
-            field_name="metadata", datatype=DataType.JSON, description="metadata"
-        )
+        schema.add_field(field_name="metadata", datatype=DataType.JSON, description="metadata")
 
         index_params = self.client.prepare_index_params()
 
@@ -157,20 +155,14 @@ class MilvusClient(VectorDBBase):
     def has_collection(self, collection_name: str) -> bool:
         # Check if the collection exists based on the collection name.
         collection_name = collection_name.replace("-", "_")
-        return self.client.has_collection(
-            collection_name=f"{self.collection_prefix}_{collection_name}"
-        )
+        return self.client.has_collection(collection_name=f"{self.collection_prefix}_{collection_name}")
 
     def delete_collection(self, collection_name: str):
         # Delete the collection based on the collection name.
         collection_name = collection_name.replace("-", "_")
-        return self.client.drop_collection(
-            collection_name=f"{self.collection_prefix}_{collection_name}"
-        )
+        return self.client.drop_collection(collection_name=f"{self.collection_prefix}_{collection_name}")
 
-    def search(
-        self, collection_name: str, vectors: list[list[float | int]], limit: int
-    ) -> Optional[SearchResult]:
+    def search(self, collection_name: str, vectors: list[list[float | int]], limit: int) -> Optional[SearchResult]:
         # Search for the nearest neighbor items based on the vectors and return 'limit' number of results.
         collection_name = collection_name.replace("-", "_")
         # For some index types like IVF_FLAT, search params like nprobe can be set.

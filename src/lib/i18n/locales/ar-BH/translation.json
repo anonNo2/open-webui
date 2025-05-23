@@ -1102,6 +1102,7 @@
 	"Sign in": "تسجيل الدخول",
 	"Sign in to {{WEBUI_NAME}}": "",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "",
+	"Sign In(authenticated)": "تسجيل الدخول(مؤهل)",
 	"Sign Out": "تسجيل الخروج",
 	"Sign up": "تسجيل",
 	"Sign up to {{WEBUI_NAME}}": "",

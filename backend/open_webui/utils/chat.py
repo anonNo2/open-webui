@@ -52,7 +52,7 @@ from open_webui.utils.filter import (
     process_filter_functions,
 )
 
-from open_webui.env import SRC_LOG_LEVELS, GLOBAL_LOG_LEVEL, BYPASS_MODEL_ACCESS_CONTROL
+from open_webui.env import SRC_LOG_LEVELS, GLOBAL_LOG_LEVEL, BYPASS_MODEL_ACCESS_CONTROL, GUEST_ENABLE_MODEL
 
 
 logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
@@ -131,9 +131,7 @@ async def generate_direct_chat_completion(
                     pass
 
             # Return the streaming response
-            return StreamingResponse(
-                event_generator(), media_type="text/event-stream", background=background
-            )
+            return StreamingResponse(event_generator(), media_type="text/event-stream", background=background)
         else:
             raise Exception(str(res))
     else:
@@ -189,12 +187,13 @@ async def generate_chat_completion(
     model = models[model_id]
 
     if getattr(request.state, "direct", False):
-        return await generate_direct_chat_completion(
-            request, form_data, user=user, models=models
-        )
+        return await generate_direct_chat_completion(request, form_data, user=user, models=models)
     else:
         # Check if user has access to the model
-        if not bypass_filter and user.role == "user":
+        if GUEST_ENABLE_MODEL and user.name.startswith("Guest"):
+            if model_id not in GUEST_ENABLE_MODEL.split(";"):
+                raise Exception("Model not found")
+        elif not bypass_filter and user.role == "user":
             try:
                 check_model_access(user, model)
             except Exception as e:
@@ -215,9 +214,7 @@ async def generate_chat_completion(
                 selected_model_id = random.choice(model_ids)
             else:
                 model_ids = [
-                    model["id"]
-                    for model in list(request.app.state.MODELS.values())
-                    if model.get("owned_by") != "arena"
+                    model["id"] for model in list(request.app.state.MODELS.values()) if model.get("owned_by") != "arena"
                 ]
                 selected_model_id = random.choice(model_ids)
 
@@ -230,9 +227,7 @@ async def generate_chat_completion(
                     async for chunk in stream:
                         yield chunk
 
-                response = await generate_chat_completion(
-                    request, form_data, user, bypass_filter=True
-                )
+                response = await generate_chat_completion(request, form_data, user, bypass_filter=True)
                 return StreamingResponse(
                     stream_wrapper(response.body_iterator),
                     media_type="text/event-stream",
@@ -240,19 +235,13 @@ async def generate_chat_completion(
                 )
             else:
                 return {
-                    **(
-                        await generate_chat_completion(
-                            request, form_data, user, bypass_filter=True
-                        )
-                    ),
+                    **(await generate_chat_completion(request, form_data, user, bypass_filter=True)),
                     "selected_model_id": selected_model_id,
                 }
 
         if model.get("pipe"):
             # Below does not require bypass_filter because this is the only route the uses this function and it is already bypassing the filter
-            return await generate_function_chat_completion(
-                request, form_data, user=user, models=models
-            )
+            return await generate_function_chat_completion(request, form_data, user=user, models=models)
         if model.get("owned_by") == "ollama":
             # Using /ollama/api/chat endpoint
             form_data = convert_payload_openai_to_ollama(form_data)
@@ -435,9 +424,7 @@ async def chat_action(request: Request, action_id: str, form_data: dict, user: A
                 try:
                     if hasattr(function_module, "UserValves"):
                         __user__["valves"] = function_module.UserValves(
-                            **Functions.get_user_valves_by_id_and_user_id(
-                                action_id, user.id
-                            )
+                            **Functions.get_user_valves_by_id_and_user_id(action_id, user.id)
                         )
                 except Exception as e:
                     log.exception(f"Failed to get user values: {e}")

@@ -54,9 +54,7 @@ def get_sorted_filter_ids(request, model: dict, enabled_filter_ids: list = None)
     return filter_ids
 
 
-async def process_filter_functions(
-    request, filter_functions, filter_type, form_data, extra_params
-):
+async def process_filter_functions(request, filter_functions, filter_type, form_data, extra_params):
     skip_files = None
 
     for function in filter_functions:
@@ -78,9 +76,7 @@ async def process_filter_functions(
         # Apply valves to the function
         if hasattr(function_module, "valves") and hasattr(function_module, "Valves"):
             valves = Functions.get_function_valves_by_id(filter_id)
-            function_module.valves = function_module.Valves(
-                **(valves if valves else {})
-            )
+            function_module.valves = function_module.Valves(**(valves if valves else {}))
 
         try:
             # Prepare parameters
@@ -104,9 +100,7 @@ async def process_filter_functions(
                 if hasattr(function_module, "UserValves"):
                     try:
                         params["__user__"]["valves"] = function_module.UserValves(
-                            **Functions.get_user_valves_by_id_and_user_id(
-                                filter_id, params["__user__"]["id"]
-                            )
+                            **Functions.get_user_valves_by_id_and_user_id(filter_id, params["__user__"]["id"])
                         )
                     except Exception as e:
                         log.exception(f"Failed to get user values: {e}")

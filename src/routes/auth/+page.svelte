@@ -6,7 +6,7 @@
 	import { page } from '$app/stores';
 
 	import { getBackendConfig } from '$lib/apis';
-	import { ldapUserSignIn, getSessionUser, userSignIn, userSignUp } from '$lib/apis/auths';
+	import { ldapUserSignIn, getSessionUser, userSignIn, userSignUp, userSignOut } from '$lib/apis/auths';
 
 	import { WEBUI_API_BASE_URL, WEBUI_BASE_URL } from '$lib/constants';
 	import { WEBUI_NAME, config, user, socket } from '$lib/stores';
@@ -19,6 +19,7 @@
 	const i18n = getContext('i18n');
 
 	let loaded = false;
+	let forceShowForm = false;
 
 	let mode = $config?.features.enable_ldap ? 'ldap' : 'signin';
 
@@ -35,9 +36,11 @@
 	};
 
 	const setSessionUser = async (sessionUser) => {
+		console.log('设置用户信息');
 		if (sessionUser) {
 			console.log(sessionUser);
-			toast.success($i18n.t(`You're now logged in.`));
+			// toast.success($i18n.t(sessionUser.role === 'admin' ? '认证用户登录.' : '访客登录.'));
+			toast.success($i18n.t(sessionUser.role === 'admin' ? '欢迎管理员登录.' : '欢迎登录.'));
 			if (sessionUser.token) {
 				localStorage.token = sessionUser.token;
 			}
@@ -51,8 +54,31 @@
 	};
 
 	const signInHandler = async () => {
+		const loginMode = querystringValue('loginmode');
+		if (loginMode === 'guest' && !email && !password) {
+			console.log('访客模式，不进行实际登录');
+			return;
+		}
+		
 		const sessionUser = await userSignIn(email, password).catch((error) => {
-			toast.error(`${error}`);
+			console.log('登录错误:', error);
+			if (error && error.statusCode === 512) {
+				toast.info($i18n.t('请注册一个新账户'));
+				mode = 'signup';
+				forceShowForm = true;
+				if ($config) {
+					$config = {
+						...$config,
+						features: {
+							...$config.features,
+							auth_trusted_header: false,
+							auth: true
+						}
+					};
+				}
+				return null;
+			}
+			toast.error(`${error.message || error}`);
 			return null;
 		});
 
@@ -138,6 +164,41 @@
 	}
 
 	onMount(async () => {
+		const loginMode = querystringValue('loginmode');
+		console.log('登录模式:', loginMode);
+		
+		if (loginMode === 'guest') {
+			console.log('访客模式，先下线当前账号，然后显示登录页面');
+			
+			// 先下线当前账号
+			if ($user) {
+				try {
+					await userSignOut(); // 调用退出登录API
+					user.set(undefined); // 清除用户信息
+					localStorage.removeItem('token'); // 移除本地存储的token
+				} catch (error) {
+					console.error('退出登录失败:', error);
+				}
+			}
+			
+			// 显示登录页面
+			mode = 'signin';
+			forceShowForm = true;
+			loaded = true;
+			setLogoImage();
+			if ($config) {
+				$config = {
+					...$config,
+					features: {
+						...$config.features,
+						auth_trusted_header: false,
+						auth: true
+					}
+				};
+			}
+			return;
+		}
+		
 		if ($user !== undefined) {
 			const redirectPath = querystringValue('redirect') || '/';
 			goto(redirectPath);
@@ -147,9 +208,11 @@
 		loaded = true;
 		setLogoImage();
 
-		if (($config?.features.auth_trusted_header ?? false) || $config?.features.auth === false) {
+		if  (($config?.features.auth_trusted_header ?? false) || $config?.features.auth === false) {
+			console.log('自动登录');
 			await signInHandler();
 		} else {
+			console.log('跳转首页');
 			onboarding = $config?.onboarding ?? false;
 		}
 	});
@@ -181,9 +244,9 @@
 					<img
 						id="logo"
 						crossorigin="anonymous"
-						src="{WEBUI_BASE_URL}/static/splash.png"
-						class=" w-6 rounded-full"
-						alt=""
+						src="{WEBUI_BASE_URL}/static/splash-long.png"
+						class="h-10 rounded-full"
+						alt="logo"
 					/>
 				</div>
 			</div>
@@ -193,7 +256,7 @@
 			class="fixed bg-transparent min-h-screen w-full flex justify-center font-primary z-50 text-black dark:text-white"
 		>
 			<div class="w-full sm:max-w-md px-10 min-h-screen flex flex-col text-center">
-				{#if ($config?.features.auth_trusted_header ?? false) || $config?.features.auth === false}
+				{#if !forceShowForm && (($config?.features.auth_trusted_header ?? false) || $config?.features.auth === false)}
 					<div class=" my-auto pb-10 w-full">
 						<div
 							class="flex items-center justify-center gap-3 text-xl sm:text-2xl text-center font-semibold dark:text-gray-200"
@@ -332,9 +395,14 @@
 
 										{#if $config?.features.enable_signup && !($config?.onboarding ?? false)}
 											<div class=" mt-4 text-sm text-center">
+												<!-- 暂不开放自主注册 -->
 												{mode === 'signin'
 													? $i18n.t("Don't have an account?")
 													: $i18n.t('Already have an account?')}
+												
+												<!-- {mode === 'signin'
+													? $i18n.t("😭Self-registration is not open yet")
+													: $i18n.t('Already have an account?')} -->
 
 												<button
 													class=" font-medium underline"

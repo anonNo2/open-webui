@@ -1,0 +1,12 @@
+services:
+  
+  format-server_cluster_nginx:
+    image: nginx:latest
+    restart: always
+    container_name: special_equip
+    
+    ports:
+      - 10086:12138
+    volumes:
+      - /data/yuhao/workspace/open-webui/nginx_for_test_env/nginx.conf:/etc/nginx/nginx.conf:ro
+    

@@ -50,9 +50,7 @@ async def get_folders(user=Depends(get_verified_user)):
             "items": {
                 "chats": [
                     {"title": chat.title, "id": chat.id}
-                    for chat in Chats.get_chats_by_folder_id_and_user_id(
-                        folder.id, user.id
-                    )
+                    for chat in Chats.get_chats_by_folder_id_and_user_id(folder.id, user.id)
                 ]
             },
         }
@@ -67,9 +65,7 @@ async def get_folders(user=Depends(get_verified_user)):
 
 @router.post("/")
 def create_folder(form_data: FolderForm, user=Depends(get_verified_user)):
-    folder = Folders.get_folder_by_parent_id_and_user_id_and_name(
-        None, user.id, form_data.name
-    )
+    folder = Folders.get_folder_by_parent_id_and_user_id_and_name(None, user.id, form_data.name)
 
     if folder:
         raise HTTPException(
@@ -112,9 +108,7 @@ async def get_folder_by_id(id: str, user=Depends(get_verified_user)):
 
 
 @router.post("/{id}/update")
-async def update_folder_name_by_id(
-    id: str, form_data: FolderForm, user=Depends(get_verified_user)
-):
+async def update_folder_name_by_id(id: str, form_data: FolderForm, user=Depends(get_verified_user)):
     folder = Folders.get_folder_by_id_and_user_id(id, user.id)
     if folder:
         existing_folder = Folders.get_folder_by_parent_id_and_user_id_and_name(
@@ -127,9 +121,7 @@ async def update_folder_name_by_id(
             )
 
         try:
-            folder = Folders.update_folder_name_by_id_and_user_id(
-                id, user.id, form_data.name
-            )
+            folder = Folders.update_folder_name_by_id_and_user_id(id, user.id, form_data.name)
 
             return folder
         except Exception as e:
@@ -156,9 +148,7 @@ class FolderParentIdForm(BaseModel):
 
 
 @router.post("/{id}/update/parent")
-async def update_folder_parent_id_by_id(
-    id: str, form_data: FolderParentIdForm, user=Depends(get_verified_user)
-):
+async def update_folder_parent_id_by_id(id: str, form_data: FolderParentIdForm, user=Depends(get_verified_user)):
     folder = Folders.get_folder_by_id_and_user_id(id, user.id)
     if folder:
         existing_folder = Folders.get_folder_by_parent_id_and_user_id_and_name(
@@ -172,9 +162,7 @@ async def update_folder_parent_id_by_id(
             )
 
         try:
-            folder = Folders.update_folder_parent_id_by_id_and_user_id(
-                id, user.id, form_data.parent_id
-            )
+            folder = Folders.update_folder_parent_id_by_id_and_user_id(id, user.id, form_data.parent_id)
             return folder
         except Exception as e:
             log.exception(e)
@@ -200,15 +188,11 @@ class FolderIsExpandedForm(BaseModel):
 
 
 @router.post("/{id}/update/expanded")
-async def update_folder_is_expanded_by_id(
-    id: str, form_data: FolderIsExpandedForm, user=Depends(get_verified_user)
-):
+async def update_folder_is_expanded_by_id(id: str, form_data: FolderIsExpandedForm, user=Depends(get_verified_user)):
     folder = Folders.get_folder_by_id_and_user_id(id, user.id)
     if folder:
         try:
-            folder = Folders.update_folder_is_expanded_by_id_and_user_id(
-                id, user.id, form_data.is_expanded
-            )
+            folder = Folders.update_folder_is_expanded_by_id_and_user_id(id, user.id, form_data.is_expanded)
             return folder
         except Exception as e:
             log.exception(e)

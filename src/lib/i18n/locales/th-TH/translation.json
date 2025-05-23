@@ -1102,6 +1102,7 @@
 	"Sign in": "ลงชื่อเข้าใช้",
 	"Sign in to {{WEBUI_NAME}}": "",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "",
+	"Sign In(authenticated)": "ลงชื่อเข้าใช้ (ตรวจสอบสิทธิ์)",
 	"Sign Out": "ลงชื่อออก",
 	"Sign up": "สมัครสมาชิก",
 	"Sign up to {{WEBUI_NAME}}": "",

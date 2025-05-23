@@ -1102,6 +1102,7 @@
 	"Sign in": "Bejelentkezés",
 	"Sign in to {{WEBUI_NAME}}": "Bejelentkezés ide: {{WEBUI_NAME}}",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "Bejelentkezés ide: {{WEBUI_NAME}} LDAP-val",
+	"Sign In(authenticated)": "Bejelentkezés (autentikált)",
 	"Sign Out": "Kijelentkezés",
 	"Sign up": "Regisztráció",
 	"Sign up to {{WEBUI_NAME}}": "Regisztráció ide: {{WEBUI_NAME}}",

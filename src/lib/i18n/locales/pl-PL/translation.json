@@ -1102,6 +1102,7 @@
 	"Sign in": "Zaloguj się",
 	"Sign in to {{WEBUI_NAME}}": "Zaloguj się do {{WEBUI_NAME}}",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "Zaloguj się do {{WEBUI_NAME}} przy użyciu LDAP",
+	"Sign In(authenticated)": "Zaloguj się (autoryzowany)",
 	"Sign Out": "Wyloguj się",
 	"Sign up": "Zarejestruj się",
 	"Sign up to {{WEBUI_NAME}}": "Zarejestruj się w {{WEBUI_NAME}}",

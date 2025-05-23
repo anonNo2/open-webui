@@ -1102,6 +1102,7 @@
 	"Sign in": "ਸਾਈਨ ਇਨ ਕਰੋ",
 	"Sign in to {{WEBUI_NAME}}": "",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "",
+	"Sign In(authenticated)": "ਸਾਈਨ ਇਨ(ਪ੍ਰਮਾਣਿਤ)",
 	"Sign Out": "ਸਾਈਨ ਆਊਟ ਕਰੋ",
 	"Sign up": "ਰਜਿਸਟਰ ਕਰੋ",
 	"Sign up to {{WEBUI_NAME}}": "",

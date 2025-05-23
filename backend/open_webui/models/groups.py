@@ -88,9 +88,7 @@ class GroupUpdateForm(GroupForm):
 
 
 class GroupTable:
-    def insert_new_group(
-        self, user_id: str, form_data: GroupForm
-    ) -> Optional[GroupModel]:
+    def insert_new_group(self, user_id: str, form_data: GroupForm) -> Optional[GroupModel]:
         with get_db() as db:
             group = GroupModel(
                 **{
@@ -118,8 +116,7 @@ class GroupTable:
     def get_groups(self) -> list[GroupModel]:
         with get_db() as db:
             return [
-                GroupModel.model_validate(group)
-                for group in db.query(Group).order_by(Group.updated_at.desc()).all()
+                GroupModel.model_validate(group) for group in db.query(Group).order_by(Group.updated_at.desc()).all()
             ]
 
     def get_groups_by_member_id(self, user_id: str) -> list[GroupModel]:
@@ -127,12 +124,8 @@ class GroupTable:
             return [
                 GroupModel.model_validate(group)
                 for group in db.query(Group)
-                .filter(
-                    func.json_array_length(Group.user_ids) > 0
-                )  # Ensure array exists
-                .filter(
-                    Group.user_ids.cast(String).like(f'%"{user_id}"%')
-                )  # String-based check
+                .filter(func.json_array_length(Group.user_ids) > 0)  # Ensure array exists
+                .filter(Group.user_ids.cast(String).like(f'%"{user_id}"%'))  # String-based check
                 .order_by(Group.updated_at.desc())
                 .all()
             ]
@@ -152,9 +145,7 @@ class GroupTable:
         else:
             return None
 
-    def update_group_by_id(
-        self, id: str, form_data: GroupUpdateForm, overwrite: bool = False
-    ) -> Optional[GroupModel]:
+    def update_group_by_id(self, id: str, form_data: GroupUpdateForm, overwrite: bool = False) -> Optional[GroupModel]:
         try:
             with get_db() as db:
                 db.query(Group).filter_by(id=id).update(

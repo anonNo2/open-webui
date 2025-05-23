@@ -15,8 +15,8 @@
 	export let getModels: Function;
 
 	// General
-	let themes = ['dark', 'light', 'rose-pine dark', 'rose-pine-dawn light', 'oled-dark'];
-	let selectedTheme = 'system';
+	const themes = ['light', 'dark', 'oled-dark', 'her', 'campus', 'rose-pine dark', 'rose-pine-dawn light'];
+	let selectedTheme = 'campus';
 
 	let languages: Awaited<ReturnType<typeof getLanguages>> = [];
 	let lang = $i18n.language;
@@ -162,67 +162,78 @@
 	});
 
 	const applyTheme = (_theme: string) => {
-		let themeToApply = _theme === 'oled-dark' ? 'dark' : _theme;
+		let themeToApply = _theme;
 
 		if (_theme === 'system') {
 			themeToApply = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 		}
 
-		if (themeToApply === 'dark' && !_theme.includes('oled')) {
+		// 移除所有主题类
+		themes.forEach((theme) => {
+			theme.split(' ').forEach((className) => {
+				document.documentElement.classList.remove(className);
+			});
+		});
+
+		// 添加新主题类
+		themeToApply.split(' ').forEach((className) => {
+			document.documentElement.classList.add(className);
+		});
+
+		// 设置主题颜色
+		const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+		if (metaThemeColor) {
+			let themeColor = '#ffffff';
+			switch (_theme) {
+				case 'dark':
+					themeColor = '#171717';
+					break;
+				case 'oled-dark':
+					themeColor = '#000000';
+					break;
+				case 'her':
+					themeColor = '#983724';
+					break;
+				case 'campus':
+					themeColor = '#eee4f7';
+					break;
+				case 'system':
+					themeColor = window.matchMedia('(prefers-color-scheme: dark)').matches ? '#171717' : '#ffffff';
+					break;
+			}
+			metaThemeColor.setAttribute('content', themeColor);
+		}
+
+		// 设置CSS变量
+		if (_theme === 'dark' || (_theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
 			document.documentElement.style.setProperty('--color-gray-800', '#333');
 			document.documentElement.style.setProperty('--color-gray-850', '#262626');
 			document.documentElement.style.setProperty('--color-gray-900', '#171717');
 			document.documentElement.style.setProperty('--color-gray-950', '#0d0d0d');
-		}
-
-		themes
-			.filter((e) => e !== themeToApply)
-			.forEach((e) => {
-				e.split(' ').forEach((e) => {
-					document.documentElement.classList.remove(e);
-				});
-			});
-
-		themeToApply.split(' ').forEach((e) => {
-			document.documentElement.classList.add(e);
-		});
-
-		const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-		if (metaThemeColor) {
-			if (_theme.includes('system')) {
-				const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-					? 'dark'
-					: 'light';
-				console.log('Setting system meta theme color: ' + systemTheme);
-				metaThemeColor.setAttribute('content', systemTheme === 'light' ? '#ffffff' : '#171717');
-			} else {
-				console.log('Setting meta theme color: ' + _theme);
-				metaThemeColor.setAttribute(
-					'content',
-					_theme === 'dark'
-						? '#171717'
-						: _theme === 'oled-dark'
-							? '#000000'
-							: _theme === 'her'
-								? '#983724'
-								: '#ffffff'
-				);
-			}
-		}
-
-		if (typeof window !== 'undefined' && window.applyTheme) {
-			window.applyTheme();
-		}
-
-		if (_theme.includes('oled')) {
+			document.documentElement.classList.add('dark');
+		} else if (_theme === 'oled-dark') {
 			document.documentElement.style.setProperty('--color-gray-800', '#101010');
 			document.documentElement.style.setProperty('--color-gray-850', '#050505');
 			document.documentElement.style.setProperty('--color-gray-900', '#000000');
 			document.documentElement.style.setProperty('--color-gray-950', '#000000');
 			document.documentElement.classList.add('dark');
+		} else if (_theme === 'campus') {
+			document.documentElement.style.setProperty('--color-gray-800', '#F7F3FA');
+			document.documentElement.style.setProperty('--color-gray-850', '#E8DFF2');
+			document.documentElement.style.setProperty('--color-gray-900', '#eee4f7');
+			document.documentElement.style.setProperty('--color-gray-950', '#D4BFE9');
+			document.documentElement.classList.remove('dark');
+			document.documentElement.classList.add('campus');
+		} else {
+			// 重置为默认值
+			document.documentElement.style.removeProperty('--color-gray-800');
+			document.documentElement.style.removeProperty('--color-gray-850');
+			document.documentElement.style.removeProperty('--color-gray-900');
+			document.documentElement.style.removeProperty('--color-gray-950');
+			document.documentElement.classList.remove('dark');
 		}
 
-		console.log(_theme);
+		console.log('Applied theme:', _theme);
 	};
 
 	const themeChangeHandler = (_theme: string) => {
@@ -250,7 +261,8 @@
 						<option value="dark">🌑 {$i18n.t('Dark')}</option>
 						<option value="oled-dark">🌃 {$i18n.t('OLED Dark')}</option>
 						<option value="light">☀️ {$i18n.t('Light')}</option>
-						<option value="her">🌷 Her</option>
+						<option value="her">�� Her</option>
+						<option value="campus">🎓 Campus</option>
 						<!-- <option value="rose-pine dark">🪻 {$i18n.t('Rosé Pine')}</option>
 						<option value="rose-pine-dawn light">🌷 {$i18n.t('Rosé Pine Dawn')}</option> -->
 					</select>

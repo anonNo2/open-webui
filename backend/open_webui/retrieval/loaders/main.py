@@ -194,9 +194,7 @@ class Loader:
         self.engine = engine
         self.kwargs = kwargs
 
-    def load(
-        self, filename: str, file_content_type: str, file_path: str
-    ) -> list[Document]:
+    def load(self, filename: str, file_content_type: str, file_path: str) -> list[Document]:
         loader = self._get_loader(filename, file_content_type, file_path)
         docs = loader.load()
 
@@ -293,9 +291,7 @@ class Loader:
             )
         else:
             if file_ext == "pdf":
-                loader = PyPDFLoader(
-                    file_path, extract_images=self.kwargs.get("PDF_EXTRACT_IMAGES")
-                )
+                loader = PyPDFLoader(file_path, extract_images=self.kwargs.get("PDF_EXTRACT_IMAGES"))
             elif file_ext == "csv":
                 loader = CSVLoader(file_path, autodetect_encoding=True)
             elif file_ext == "rst":
@@ -309,8 +305,7 @@ class Loader:
             elif file_content_type == "application/epub+zip":
                 loader = UnstructuredEPubLoader(file_path)
             elif (
-                file_content_type
-                == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                file_content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 or file_ext == "docx"
             ):
                 loader = Docx2txtLoader(file_path)
