@@ -10,7 +10,7 @@ export OPENAI_API_BASE_URL=''
 export OPENAI_API_KEY=''
 # admin admin@example.com admin
 #export CORS_ALLOW_ORIGIN='http://localhost:5173;http://localhost:18080;http://localhost:12138;http://10.20.12.36:5173;http://10.20.12.36:18080;http://10.20.12.36:12138'
-export CORS_ALLOW_ORIGIN='*'
+export CORS_ALLOW_ORIGIN='http://10.20.13.1:5173'
 
 export ENABLE_CODE_EXECUTION=false
 export ENABLE_CODE_INTERPRETER=false
@@ -21,6 +21,11 @@ export USER_PERMISSIONS_CHAT_CONTROLS=false
 export USER_PERMISSIONS_CHAT_FILE_UPLOAD=false
 export USER_PERMISSIONS_CHAT_EDIT=false
 export ENABLE_COMMUNITY_SHARING=false
+
+
+# 按钮控制
+# ENABLE_PERSISTENT_CONFIG=false
+export ENABLE_KNOWLEDGE_BASE=false
 
 # 访客模式配置
 export WEBUI_AUTH=true

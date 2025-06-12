@@ -147,7 +147,7 @@
 					{:else}
 						{$i18n.t('Hello, {{name}}', { name: $user.name })}
 					{/if} -->
-					特种设备智能问答
+					SRIBD-Agents
 				</div>
 			</div>
 
