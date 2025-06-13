@@ -1,8 +1,8 @@
 [project]
-name = "SRIBD-Agents"
-description = "SRIBD-Agents"
+name = "宫颈癌健康咨询"
+description = "宫颈癌健康咨询"
 authors = [
-    { name = "Timothy Jaeryang Baek", email = "tim@openwebui.com" }
+    { name = "huangshan", email = "huangshan@sribd.cn" }
 ]
 license = { file = "LICENSE" }
 dependencies = [

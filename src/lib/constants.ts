@@ -1,7 +1,7 @@
 import { browser, dev } from '$app/environment';
 // import { version } from '../../package.json';
 
-export const APP_NAME = 'SRIBD-Agents';
+export const APP_NAME = '宫颈癌健康咨询';
 
 // Normal mode
 // export const WEBUI_HOSTNAME = browser ? (dev ? `${location.hostname}:18080` : ``) : '';

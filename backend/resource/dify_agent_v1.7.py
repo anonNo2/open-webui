@@ -144,7 +144,7 @@ class Pipe:
         """
 
         return [
-            {"id": "fullflow", "name": "csei-GPT"},
+            {"id": "fullflow", "name": "CC-GPT"},
             
         ]
 

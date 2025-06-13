@@ -113,29 +113,18 @@ DEFAULT_CONFIG = {
         "default_locale": "",
         "prompt_suggestions": [
             {
-                "title": ["询问特种设备", "关于特种设备"],
-                "content": "什么是特种设备？",
+                "title": ["HPV阳性", "宫颈癌"],
+                "content": "HPV阳性该怎么办？",
+            },
+
+            {
+                "title": ["宫颈癌", "HPV"],
+                "content": "打过2价/4价了，现在需要再打9价吗？",
             },
             {
-                "title": ["给我建议", "提高工作效率"],
-                "content": "有哪5个基于证据的策略可以帮助我在家工作时提高工作效率？",
-            },
-            {
-                "title": ["告诉我一个有趣的事实", "关于人工智能"],
-                "content": "告诉我一个关于人工智能历史的随机有趣事实。",
-            },
-            {
-                "title": ["解释一个概念", "机器学习基础"],
-                "content": "解释神经网络是如何工作的，假设我有基本的数学知识。",
-            },
-            {
-                "title": ["帮我头脑风暴", "项目创意"],
-                "content": "你能问我一些关于我的兴趣和技能的问题，然后建议一些我可以开发的编程项目吗？",
-            },
-            {
-                "title": ["语法检查", "改进我的写作"],
-                "content": "检查以下句子的语法和清晰度：'[句子]'。重写它以提高可读性，同时保持其原意。",
-            },
+                "title": ["宫颈癌筛查", "HPV"],
+                "content": "宫颈癌筛查要做些什么？",
+            }
         ],
     },
 }
@@ -184,15 +173,15 @@ T = TypeVar("T")
 
 
 
-import debugpy
-#
-# # # # 设置调试服务器的监听地址和端口
-debugpy.listen(("0.0.0.0", 5678))
+# import debugpy
+# #
+# # # # # 设置调试服务器的监听地址和端口
+# debugpy.listen(("0.0.0.0", 5678))
 
-print("Waiting for debugger attach...")
-# 等待调试器附加
-debugpy.wait_for_client()
-print("Debugger attached")
+# print("Waiting for debugger attach...")
+# # 等待调试器附加
+# debugpy.wait_for_client()
+# print("Debugger attached")
 
 
 ENABLE_PERSISTENT_CONFIG = (

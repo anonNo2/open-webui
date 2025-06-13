@@ -14,8 +14,8 @@ export CORS_ALLOW_ORIGIN='http://10.20.13.1:5173'
 
 export ENABLE_CODE_EXECUTION=false
 export ENABLE_CODE_INTERPRETER=false
-# export CUSTOM_NAME="SRIBD-Agents"
-export WEBUI_NAME="SRIBD-Agents"
+# export CUSTOM_NAME="宫颈癌健康咨询"
+export WEBUI_NAME="宫颈癌健康咨询"
 
 export USER_PERMISSIONS_CHAT_CONTROLS=false
 export USER_PERMISSIONS_CHAT_FILE_UPLOAD=false
@@ -24,8 +24,10 @@ export ENABLE_COMMUNITY_SHARING=false
 
 
 # 按钮控制
-# ENABLE_PERSISTENT_CONFIG=false
+ENABLE_PERSISTENT_CONFIG=false
 export ENABLE_KNOWLEDGE_BASE=false
+export ENABLE_DEEP_WEB_SEARCH=false
+export ENABLE_DEEP_RESEARCH=false
 
 # 访客模式配置
 export WEBUI_AUTH=true
