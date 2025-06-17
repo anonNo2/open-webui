@@ -145,6 +145,50 @@
 								})}
 							/>
 						{/if}
+					{:else if attributes?.type === 'search'}
+						{#if attributes?.done === 'true' && attributes?.duration}
+							{#if attributes.duration < 60}
+								{$i18n.t('Searched for {{DURATION}} seconds', {
+									DURATION: attributes.duration
+								})}
+							{:else}
+								{$i18n.t('Searched for {{DURATION}}', {
+									DURATION: dayjs.duration(attributes.duration, 'seconds').humanize()
+								})}
+							{/if}
+						{:else}
+							{$i18n.t('Searching...')}
+						{/if}
+					{:else if attributes?.type === 'postprocess'}
+						{#if attributes?.done === 'true' && attributes?.duration}
+							{#if attributes.duration < 60}
+								{$i18n.t('Postprocessed for {{DURATION}} seconds', {
+									DURATION: attributes.duration
+								})}
+							{:else}
+								{$i18n.t('Postprocessed for {{DURATION}}', {
+									DURATION: dayjs.duration(attributes.duration, 'seconds').humanize()
+								})}
+							{/if}
+						{:else}
+							{$i18n.t('Postprocessing...')}
+						{/if}
+					{:else if attributes?.type === 'retrieve'}
+						{#if attributes?.done === 'true' && attributes?.duration}
+							{#if attributes.duration < 60}
+								{$i18n.t('Retrieved for {{DURATION}} seconds', {
+									DURATION: attributes.duration
+								})}
+							{:else}
+								{$i18n.t('Retrieved for {{DURATION}}', {
+									DURATION: dayjs.duration(attributes.duration, 'seconds').humanize()
+								})}
+							{/if}
+						{:else}
+							{$i18n.t('Retrieving...')}
+						{/if}
+					{:else if attributes?.type === 'search_results'}
+						{$i18n.t('Search_results')}
 					{:else}
 						{title}
 					{/if}
