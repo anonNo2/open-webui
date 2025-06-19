@@ -159,6 +159,20 @@
 						{:else}
 							{$i18n.t('Searching...')}
 						{/if}
+					{:else if attributes?.type === 'plan'}
+						{#if attributes?.done === 'true' && attributes?.duration}
+							{#if attributes.duration < 60}
+								{$i18n.t('Planned for {{DURATION}} seconds', {
+									DURATION: attributes.duration
+								})}
+							{:else}
+								{$i18n.t('Planned for {{DURATION}}', {
+									DURATION: dayjs.duration(attributes.duration, 'seconds').humanize()
+								})}
+							{/if}
+						{:else}
+							{$i18n.t('Planning...')}
+						{/if}
 					{:else if attributes?.type === 'postprocess'}
 						{#if attributes?.done === 'true' && attributes?.duration}
 							{#if attributes.duration < 60}

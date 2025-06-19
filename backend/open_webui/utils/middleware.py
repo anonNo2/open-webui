@@ -1259,6 +1259,92 @@ async def process_chat_response(request, response, form_data, user, metadata, mo
                             else:
                                 content = f'{content}\n<details type="reasoning" done="false">\n<summary>Thinking…</summary>\n{reasoning_display_content}\n</details>\n'
 
+                    # 新增 search 类型
+                    elif block["type"] == "search":
+                        search_display_content = "\n".join(
+                            (f"> {line}" if not line.startswith(">") else line)
+                            for line in block["content"].splitlines()
+                        )
+                        search_duration = block.get("duration", None)
+                        if search_duration is not None:
+                            if raw:
+                                content = f'{content}\n<{block["start_tag"]}>{block["content"]}<{block["end_tag"]}>\n'
+                            else:
+                                content = f'{content}\n<details type="search" done="true" duration="{search_duration}">\n<summary>Searched for {search_duration} seconds</summary>\n{search_display_content}\n</details>\n'
+                        else:
+                            if raw:
+                                content = f'{content}\n<{block["start_tag"]}>{block["content"]}<{block["end_tag"]}>\n'
+                            else:
+                                content = f'{content}\n<details type="search" done="false">\n<summary>Searching…</summary>\n{search_display_content}\n</details>\n'
+
+                    elif block["type"] == "plan":
+                        search_display_content = "\n".join(
+                            (f"> {line}" if not line.startswith(">") else line)
+                            for line in block["content"].splitlines()
+                        )
+                        search_duration = block.get("duration", None)
+                        if search_duration is not None:
+                            if raw:
+                                content = f'{content}\n<{block["start_tag"]}>{block["content"]}<{block["end_tag"]}>\n'
+                            else:
+                                content = f'{content}\n<details type="plan" done="true" duration="{search_duration}" >\n<summary>Planned for {search_duration} seconds</summary>\n{search_display_content}\n</details>\n'
+                        else:
+                            if raw:
+                                content = f'{content}\n<{block["start_tag"]}>{block["content"]}<{block["end_tag"]}>\n'
+                            else:
+                                content = f'{content}\n<details type="plan" done="false">\n<summary>Planning…</summary>\n{search_display_content}\n</details>\n'
+
+
+                    # 新增 postprocess 类型
+                    elif block["type"] == "postprocess":
+                        postprocess_display_content = "\n".join(
+                            (f"> {line}" if not line.startswith(">") else line)
+                            for line in block["content"].splitlines()
+                        )
+                        postprocess_duration = block.get("duration", None)
+                        if postprocess_duration is not None:
+                            if raw:
+                                # print(f"RAW")
+                                content = f'{content}\n<{block["start_tag"]}>{block["content"]}<{block["end_tag"]}>\n'
+                            else:
+                                # print(f"NOT RAW")
+                                content = f'{content}\n<details type="postprocess" done="true" duration="{postprocess_duration}">\n<summary>Postprocessed for {postprocess_duration} seconds</summary>\n{postprocess_display_content}\n</details>\n'
+                        else:
+                            # print("Duration is None")
+                            if raw:
+                                content = f'{content}\n<{block["start_tag"]}>{block["content"]}<{block["end_tag"]}>\n'
+                            else:
+                                content = f'{content}\n<details type="postprocess" done="false">\n<summary>Postprocessing…</summary>\n{postprocess_display_content}\n</details>\n'
+
+                    # 新增 retrieve 类型
+                    elif block["type"] == "retrieve":
+                        retrieve_display_content = "\n".join(
+                            (f"> {line}" if not line.startswith(">") else line)
+                            for line in block["content"].splitlines()
+                        )
+                        retrieve_duration = block.get("duration", None)
+                        if retrieve_duration is not None:
+                            if raw:
+                                content = f'{content}\n<{block["start_tag"]}>{block["content"]}<{block["end_tag"]}>\n'
+                            else:
+                                content = f'{content}\n<details type="retrieve" done="true" duration="{retrieve_duration}">\n<summary>Retrieved for {retrieve_duration} seconds</summary>\n{retrieve_display_content}\n</details>\n'
+                        else:
+                            if raw:
+                                content = f'{content}\n<{block["start_tag"]}>{block["content"]}<{block["end_tag"]}>\n'
+                            else:
+                                content = f'{content}\n<details type="retrieve" done="false">\n<summary>Retrieving…</summary>\n{retrieve_display_content}\n</details>\n'
+
+                    # 新增 search_results 类型
+                    elif block["type"] == "search_results":
+                        search_results_display_content = "\n".join(
+                            (f"> {line}" if not line.startswith(">") else line)
+                            for line in block["content"].splitlines()
+                        )
+                        if raw:
+                            content = f'{content}\n<{block["start_tag"]}>{block["content"]}<{block["end_tag"]}>\n'
+                        else:
+                            content = f'{content}\n<details type="search_results" done="true">\n<summary>Search_results</summary>\n{search_results_display_content}\n</details>\n'
+
                     elif block["type"] == "code_interpreter":
                         attributes = block.get("attributes", {})
                         output = block.get("output", None)
@@ -1285,6 +1371,8 @@ async def process_chat_response(request, response, form_data, user, metadata, mo
                             else:
                                 content = f'{content}\n<details type="code_interpreter" done="false">\n<summary>Analyzing...</summary>\n```{lang}\n{block["content"]}\n```\n</details>\n'
 
+
+                    
                     else:
                         block_content = str(block["content"]).strip()
                         content = f"{content}{block['type']}: {block_content}\n"
@@ -1492,6 +1580,11 @@ async def process_chat_response(request, response, form_data, user, metadata, mo
             DETECT_REASONING = True
             DETECT_SOLUTION = True
             DETECT_CODE_INTERPRETER = metadata.get("features", {}).get("code_interpreter", False)
+            DETECT_SEARCHING = True
+            DETECT_PLANNING = True
+            DETECT_RETRIEVING = True
+            DETECT_SEARCH_RESULTS = True
+            DETECT_POSTPROCESSING = True
 
             reasoning_tags = [
                 ("details", "/details"),
@@ -1507,6 +1600,12 @@ async def process_chat_response(request, response, form_data, user, metadata, mo
             code_interpreter_tags = [("code_interpreter", "/code_interpreter")]
 
             solution_tags = [("|begin_of_solution|", "|end_of_solution|")]
+
+            searching_tags = [("search", "/search")]
+            planning_tags = [("plan", "/plan")]
+            retrieving_tags = [("retrieve", "/retrieve")]
+            search_results_tags = [("search_results", "/search_results")]
+            postprocessing_tags = [("postprocess", "/postprocess")]
 
             try:
                 for event in events:
@@ -1732,6 +1831,42 @@ async def process_chat_response(request, response, form_data, user, metadata, mo
                                             content, content_blocks, _ = tag_content_handler(
                                                 "solution",
                                                 solution_tags,
+                                                content,
+                                                content_blocks,
+                                            )
+
+                                        if DETECT_SEARCHING:
+                                            content, content_blocks, _ = tag_content_handler(
+                                                "search",
+                                                searching_tags,
+                                                content,
+                                                content_blocks,
+                                            )
+                                        if DETECT_PLANNING:
+                                            content, content_blocks, _ = tag_content_handler(
+                                                "plan",
+                                                planning_tags,
+                                                content,
+                                                content_blocks,
+                                            )
+                                        if DETECT_RETRIEVING:
+                                            content, content_blocks, _ = tag_content_handler(
+                                                "retrieve",
+                                                retrieving_tags,
+                                                content,
+                                                content_blocks,
+                                            )
+                                        if DETECT_SEARCH_RESULTS:
+                                            content, content_blocks, _ = tag_content_handler(
+                                                "search_results",
+                                                search_results_tags,
+                                                content,
+                                                content_blocks,
+                                            )
+                                        if DETECT_POSTPROCESSING:
+                                            content, content_blocks, _ = tag_content_handler(
+                                                "postprocess",
+                                                postprocessing_tags,
                                                 content,
                                                 content_blocks,
                                             )

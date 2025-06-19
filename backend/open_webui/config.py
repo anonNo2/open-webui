@@ -184,15 +184,15 @@ T = TypeVar("T")
 
 
 
-import debugpy
-#
-# # # # 设置调试服务器的监听地址和端口
-debugpy.listen(("0.0.0.0", 5678))
+# import debugpy
+# #
+# # # # # 设置调试服务器的监听地址和端口
+# debugpy.listen(("0.0.0.0", 5678))
 
-print("Waiting for debugger attach...")
-# 等待调试器附加
-debugpy.wait_for_client()
-print("Debugger attached")
+# print("Waiting for debugger attach...")
+# # 等待调试器附加
+# debugpy.wait_for_client()
+# print("Debugger attached")
 
 
 ENABLE_PERSISTENT_CONFIG = (

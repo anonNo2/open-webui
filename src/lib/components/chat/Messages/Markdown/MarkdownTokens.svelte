@@ -182,7 +182,7 @@
 		{#if alert}
 			<AlertRenderer {token} {alert} />
 		{:else}
-			<blockquote dir="auto">
+			<blockquote dir="auto" style="color: gray;">
 				<svelte:self id={`${id}-${tokenIdx}`} tokens={token.tokens} {onTaskClick} {onSourceClick} />
 			</blockquote>
 		{/if}
