@@ -952,26 +952,22 @@ except Exception as e:
 if default_prompt_suggestions == []:
     default_prompt_suggestions = [
         {
-            "title": ["帮我学习", "医学术语"],
-            "content": "帮我学习医学术语：写一个句子让我填空，我会尝试选择正确的选项。",
+        "title": ["帮我学习", "政务基础概念"],
+        "content": "帮我学习政务术语：写一个句子让我填空，我会尝试选择正确的选项。",
         },
         {
-            "title": ["给我建议", "如何处理孩子的健康问题"],
-            "content": "我的孩子最近经常感冒，你能给我 5 个建议来增强他的免疫力吗？",
+        "title": ["给我建议", "如何处理社区事务"],
+        "content": "我所在的社区需要推进垃圾分类，你能给我 5 个建议来提高居民参与度吗？",
         },
-        {"title": ["告诉我一个有趣的事实", "关于中医"], "content": "告诉我一个关于中医的随机有趣事实。"},
+        {"title": ["告诉我一个有趣的事实", "关于电子政务"], "content": "告诉我一个关于电子政务的随机有趣事实。"},
         {
-            "title": ["展示一个代码片段", "用于健康监测应用"],
-            "content": "展示一个用于健康监测应用的代码片段，使用 Python 和机器学习库。",
-        },
-        {
-            "title": ["解释疫苗接种", "如果我对免疫系统有基本了解"],
-            "content": "解释疫苗接种的机制，假设我对免疫系统有基本了解。",
+        "title": ["展示一个代码片段", "用于政务管理系统"],
+        "content": "展示一个用于政务数据统计的代码片段，使用 Python 和数据处理库。",
         },
         {
-            "title": ["Overcome procrastination", "give me tips"],
-            "content": "Could you start by asking me about instances when I procrastinate the most and then give me some suggestions to overcome it?",
-        },
+        "title": ["解释政务公开", "如果我对行政管理有基本了解"],
+        "content": "解释政务公开的机制，假设我对行政管理有基本了解。",
+        }
     ]
 
 DEFAULT_PROMPT_SUGGESTIONS = PersistentConfig(

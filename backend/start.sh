@@ -24,13 +24,13 @@ export ENABLE_COMMUNITY_SHARING=false
 
 
 # 按钮控制
-# ENABLE_PERSISTENT_CONFIG=false
+export ENABLE_PERSISTENT_CONFIG=false
 export ENABLE_KNOWLEDGE_BASE=false
 export ENABLE_DEEP_RESEARCH=false
 # 访客模式配置
 export WEBUI_AUTH=true
 export ENABLE_SIGNUP=true
-export ENABLE_AUTO_AUTH=true
+export ENABLE_AUTO_AUTH=false
 # export AUTH_TRUSTED_EMAIL_HEADER=true
 # export WEBUI_AUTH_TRUSTED_EMAIL_HEADER=X-User-Email
 # export WEBUI_AUTH_TRUSTED_NAME_HEADER=X-User-Name

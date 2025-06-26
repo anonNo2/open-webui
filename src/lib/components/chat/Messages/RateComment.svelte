@@ -13,20 +13,19 @@
 	export let show = false;
 
 	let LIKE_REASONS = [
-		'accurate_model_response',
-		'accurate_regulation_retrieval',
-		'effective_thinking_process',
-		'other'
+		'accurate_results',
+		'rich_content',
+		'good_ai_interpretation',
+		'others_positive'
 	];
 	let DISLIKE_REASONS = [
-		'contains_partial_correct_answer_no_extra',
-		'contains_full_correct_answer_with_extra',
-		'contains_partial_correct_answer_with_extra',
-		'contains_no_correct_answer',
-		'inaccurate_regulation_retrieval',
-		'misunderstood_question',
-		'incorrect_answer_format',
-		'other'
+		'inaccurate_results',
+		'slow_speed',
+		'repetitive_content',
+		'incorrect_content',
+		'excessive_search_rounds',
+		'insufficient_search_rounds',
+		'others_negative'
 	];
 
 	let tags = [];
@@ -186,28 +185,28 @@
 							: ''} transition rounded-xl"
 						on:click={() => toggleReason(reason)}
 					>
-						{#if reason === 'accurate_model_response'}
-							{$i18n.t('Accurate model response')}
-						{:else if reason === 'accurate_regulation_retrieval'}
-							{$i18n.t('Accurate regulation retrieval')}
-						{:else if reason === 'effective_thinking_process'}
-							{$i18n.t('Effective thinking process')}
-						{:else if reason === 'contains_partial_correct_answer_no_extra'}
-							{$i18n.t('Contains partial correct answer, no extra content')}
-						{:else if reason === 'contains_full_correct_answer_with_extra'}
-							{$i18n.t('Contains full correct answer with extra content')}
-						{:else if reason === 'contains_partial_correct_answer_with_extra'}
-							{$i18n.t('Contains partial correct answer with extra content')}
-						{:else if reason === 'contains_no_correct_answer'}
-							{$i18n.t('Contains no correct answer')}
-						{:else if reason === 'inaccurate_regulation_retrieval'}
-							{$i18n.t('Inaccurate regulation retrieval')}
-						{:else if reason === 'misunderstood_question'}
-							{$i18n.t('Misunderstood the question')}
-						{:else if reason === 'incorrect_answer_format'}
-							{$i18n.t('Incorrect answer format')}
-						{:else if reason === 'other'}
-							{$i18n.t('Other')}
+						{#if reason === 'accurate_results'}
+							{$i18n.t('Accurate results that perfectly match my needs')}
+						{:else if reason === 'rich_content'}
+							{$i18n.t('Rich and comprehensive content that is helpful')}
+						{:else if reason === 'good_ai_interpretation'}
+							{$i18n.t('Easy to understand, excellent AI interpretation')}
+						{:else if reason === 'others_positive'}
+							{$i18n.t('Others')}
+						{:else if reason === 'inaccurate_results'}
+							{$i18n.t("Inaccurate search results that don't match my needs")}
+						{:else if reason === 'slow_speed'}
+							{$i18n.t('Slow speed, poor overall experience')}
+						{:else if reason === 'repetitive_content'}
+							{$i18n.t('Repetitive and redundant content, unhelpful')}
+						{:else if reason === 'incorrect_content'}
+							{$i18n.t('Contains incorrect, outdated, or misleading content, affecting the experience')}
+						{:else if reason === 'excessive_search_rounds'}
+							{$i18n.t('Too many search rounds, which I deem unnecessary')}
+						{:else if reason === 'insufficient_search_rounds'}
+							{$i18n.t('Too few search rounds, lacking depth')}
+						{:else if reason === 'others_negative'}
+							{$i18n.t('Others')}
 						{:else}
 							{reason}
 						{/if}

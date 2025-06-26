@@ -44,7 +44,7 @@
 
 	export let id = '';
 	export let title = null;
-	export let attributes = null;
+	export let attributes: any = null;
 
 	export let chevron = false;
 	export let grow = false;
@@ -84,7 +84,7 @@
 </script>
 
 <div {id} class={className}>
-	{#if title !== null}
+	{#if title !== null && attributes?.type !== 'hide'}
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<div
@@ -217,6 +217,13 @@
 				</div>
 			</div>
 		</div>
+
+	{:else if attributes?.type === 'hide'}
+		<!-- 隐藏内容，但保留在HTML中，用div data-type="hide"包裹 -->
+		<div data-type="hide" style="display: none;">
+			<slot name="content" />
+		</div>
+	
 	{:else}
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<!-- svelte-ignore a11y-click-events-have-key-events -->

@@ -502,6 +502,7 @@ class Pipe:
                                     # 保存会话和消息ID映射
                                     dify_conversation_id = data.get("conversation_id", "")
                                     dify_message_id = data.get("message_id", "")
+                                    
 
                                     self.chat_message_mapping[chat_id]["dify_conversation_id"] = dify_conversation_id
                                     self.chat_message_mapping[chat_id]["messages"].append({message_id: dify_message_id})

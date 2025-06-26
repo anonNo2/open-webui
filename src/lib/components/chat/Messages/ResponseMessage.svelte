@@ -135,6 +135,7 @@
 
 	let buttonsContainerElement: HTMLDivElement;
 	let showDeleteConfirm = false;
+	
 
 	let model = null;
 	$: model = $models.find((m) => m.id === message.model);
@@ -597,6 +598,7 @@
 		deleteMessageHandler();
 	}}
 />
+
 
 <div bind:this={screenReaderDiv} aria-live="polite" class="sr-only">
 	{message.done ? message.content : ''}
@@ -1284,41 +1286,6 @@
 										</Tooltip>
 									{/if}
 
-									<!--{#if isLastMessage}-->
-									<!--	<Tooltip content={$i18n.t('Continue Response')} placement="bottom">-->
-									<!--		<button-->
-									<!--			type="button"-->
-									<!--			id="continue-response-button"-->
-									<!--			class="{isLastMessage-->
-									<!--				? 'visible'-->
-									<!--				: 'invisible group-hover:visible'} p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg dark:hover:text-white hover:text-black transition regenerate-response-button"-->
-									<!--			on:click={() => {-->
-									<!--				continueResponse();-->
-									<!--			}}-->
-									<!--		>-->
-									<!--			<svg-->
-									<!--				xmlns="http://www.w3.org/2000/svg"-->
-									<!--				fill="none"-->
-									<!--				viewBox="0 0 24 24"-->
-									<!--				stroke-width="2.3"-->
-									<!--				stroke="currentColor"-->
-									<!--				class="w-4 h-4"-->
-									<!--			>-->
-									<!--				<path-->
-									<!--					stroke-linecap="round"-->
-									<!--					stroke-linejoin="round"-->
-									<!--					d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"-->
-									<!--				/>-->
-									<!--				<path-->
-									<!--					stroke-linecap="round"-->
-									<!--					stroke-linejoin="round"-->
-									<!--					d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z"-->
-									<!--				/>-->
-									<!--			</svg>-->
-									<!--		</button>-->
-									<!--	</Tooltip>-->
-									<!--{/if}-->
-
 									<Tooltip content={$i18n.t('Regenerate')} placement="bottom">
 										<button
 											type="button"
@@ -1358,6 +1325,43 @@
 											</svg>
 										</button>
 									</Tooltip>
+									
+									<Tooltip content="置信检查" placement="bottom">
+										<button
+											type="button"
+											class="{isLastMessage
+												? 'visible'
+												: 'invisible group-hover:visible'} p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg dark:hover:text-white hover:text-black transition"
+											on:click={(e) => {
+												const button = e.currentTarget;
+												const responseContent = button?.parentElement?.parentElement?.previousElementSibling?.querySelector('div[id="response-content-container"]');
+												console.log(responseContent);
+												if (responseContent) {
+													// 获取文本内容
+													const text = responseContent.textContent || '';
+													console.log('响应内容:', text);
+												}
+												alert('置信检查功能正在开发，敬请期待~');
+												console.log('置信检查确认');
+											}}
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke-width="2.3"
+												stroke="currentColor" 
+												class="w-4 h-4"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+												/>
+											</svg>
+										</button>
+									</Tooltip>
+									
 
 									{#if siblings.length > 1}
 										<Tooltip content={$i18n.t('Delete')} placement="bottom">

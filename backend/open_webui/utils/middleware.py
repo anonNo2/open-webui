@@ -1345,6 +1345,13 @@ async def process_chat_response(request, response, form_data, user, metadata, mo
                         else:
                             content = f'{content}\n<details type="search_results" done="true">\n<summary>Search_results</summary>\n{search_results_display_content}\n</details>\n'
 
+                    # 新增 hide 类型
+                    elif block["type"] == "hide":
+                        hide_content = "\n".join(
+                            (f"> {line}" if not line.startswith(">") else line)
+                            for line in block["content"].splitlines()
+                        )
+                        content = f'{content}\n<details type="hide" done="true" workid="{hide_content}">\n<summary>hide</summary>\n{hide_content}\n</details>\n'
                     elif block["type"] == "code_interpreter":
                         attributes = block.get("attributes", {})
                         output = block.get("output", None)
@@ -1585,6 +1592,7 @@ async def process_chat_response(request, response, form_data, user, metadata, mo
             DETECT_RETRIEVING = True
             DETECT_SEARCH_RESULTS = True
             DETECT_POSTPROCESSING = True
+            DETECT_HIDE = True
 
             reasoning_tags = [
                 ("details", "/details"),
@@ -1606,6 +1614,7 @@ async def process_chat_response(request, response, form_data, user, metadata, mo
             retrieving_tags = [("retrieve", "/retrieve")]
             search_results_tags = [("search_results", "/search_results")]
             postprocessing_tags = [("postprocess", "/postprocess")]
+            hide_tags = [("hide", "/hide")]
 
             try:
                 for event in events:
@@ -1867,6 +1876,13 @@ async def process_chat_response(request, response, form_data, user, metadata, mo
                                             content, content_blocks, _ = tag_content_handler(
                                                 "postprocess",
                                                 postprocessing_tags,
+                                                content,
+                                                content_blocks,
+                                            )
+                                        if DETECT_HIDE:
+                                            content, content_blocks, _ = tag_content_handler(
+                                                "hide",
+                                                hide_tags,
                                                 content,
                                                 content_blocks,
                                             )
