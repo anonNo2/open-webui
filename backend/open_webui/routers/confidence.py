@@ -209,6 +209,16 @@ async def simulate_confidence_check(text: str, workflow_id: str) -> AsyncGenerat
                 timeout=60.0
             )
             result = response.json()
+            raw_reason_content = result['data']['outputs']['confidence_results']
+            reason, status = raw_reason_content.split('status')
+            label = ""
+            if '低置信' in status:
+                label = "no"
+            elif '高置信' in status:
+                label = "yes"
+            reason = reason.replace('#',"").replace('``',"").strip()
+            result['data']['outputs']['confidence_results'] = {'status':label,'reason':reason}
+            result['data']['outputs']['raw_content'] = raw_reason_content
             if len(ref_items) != len(ref_ids):
                 result['data']['outputs']['ref_ids'] = result['data']['outputs']['ref_ids'] + '--预警：可能出现幻觉引用'
             return result
