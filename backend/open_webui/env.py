@@ -323,6 +323,13 @@ REDIS_SENTINEL_HOSTS = os.environ.get("REDIS_SENTINEL_HOSTS", "")
 REDIS_SENTINEL_PORT = os.environ.get("REDIS_SENTINEL_PORT", "26379")
 
 ####################################
+# CONFIDENCE CHECK
+####################################
+
+CONFIDENCE_CHECK_URL = os.environ.get("CONFIDENCE_CHECK_URL", "")
+CONFIDENCE_CHECK_TOKEN = os.environ.get("CONFIDENCE_CHECK_TOKEN", "")
+
+####################################
 # UVICORN WORKERS
 ####################################
 

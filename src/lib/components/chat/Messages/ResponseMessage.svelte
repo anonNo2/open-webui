@@ -14,6 +14,7 @@
 	import { createNewFeedback, getFeedbackById, updateFeedbackById } from '$lib/apis/evaluations';
 	import { getChatById } from '$lib/apis/chats';
 	import { generateTags } from '$lib/apis';
+	import { confidenceCheckStream } from '$lib/apis/confidence';
 
 	import { config, models, settings, temporaryChatEnabled, TTSWorker, user } from '$lib/stores';
 	import { synthesizeOpenAISpeech } from '$lib/apis/audio';
@@ -48,6 +49,7 @@
 	import ContentRenderer from './ContentRenderer.svelte';
 	import { KokoroWorker } from '$lib/workers/KokoroWorker';
 	import FileItem from '$lib/components/common/FileItem.svelte';
+	import { marked } from 'marked';
 
 	interface MessageType {
 		id: string;
@@ -1225,11 +1227,6 @@
 												disabled={feedbackLoading}
 												on:click={async () => {
 													await feedbackHandler(1);
-													window.setTimeout(() => {
-														document
-															.getElementById(`message-feedback-${message.id}`)
-															?.scrollIntoView();
-													}, 0);
 												}}
 											>
 												<svg
@@ -1261,11 +1258,6 @@
 												disabled={feedbackLoading}
 												on:click={async () => {
 													await feedbackHandler(-1);
-													window.setTimeout(() => {
-														document
-															.getElementById(`message-feedback-${message.id}`)
-															?.scrollIntoView();
-													}, 0);
 												}}
 											>
 												<svg
@@ -1332,17 +1324,109 @@
 											class="{isLastMessage
 												? 'visible'
 												: 'invisible group-hover:visible'} p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg dark:hover:text-white hover:text-black transition"
-											on:click={(e) => {
+											on:click={async (e) => {
 												const button = e.currentTarget;
 												const responseContent = button?.parentElement?.parentElement?.previousElementSibling?.querySelector('div[id="response-content-container"]');
+
+												const workflowElements = button?.parentElement?.parentElement?.previousElementSibling?.querySelector('div[data-type="hide"]');
 												console.log(responseContent);
-												if (responseContent) {
+												console.log(workflowElements);
+												
+												if (responseContent && workflowElements) {
 													// 获取文本内容
-													const text = responseContent.textContent || '';
+													const text = responseContent.innerHTML || '';
 													console.log('响应内容:', text);
+													const workflowId = workflowElements.textContent || '';
+													console.log('工作流ID:', workflowId);
+													
+													if (text.trim() && workflowId.trim()) {
+														try {
+															// 显示加载状态
+															button.disabled = true;
+															button.innerHTML = `
+																<svg class="w-4 h-4 animate-spin" fill="currentColor" viewBox="0 0 24 24">
+																	<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+																	<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+																</svg>
+															`;
+															
+															// 通过当前消息的响应内容容器来查找或创建结果容器
+															let resultContainer = responseContent.parentElement?.querySelector('.confidence-result-container');
+															if (!resultContainer) {
+																resultContainer = document.createElement('div');
+																resultContainer.className = 'confidence-result-container mt-4 relative overflow-hidden rounded-xl border border-blue-200/50 dark:border-blue-800/50 bg-gradient-to-br from-blue-50/80 to-indigo-50/60 dark:from-blue-900/20 dark:to-indigo-900/10 backdrop-blur-sm shadow-lg';
+																resultContainer.innerHTML = `
+																	<button class="close-confidence-btn absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 dark:bg-gray-800/80 hover:bg-red-50 dark:hover:bg-red-900/20 border border-gray-200/50 dark:border-gray-700/50 transition-all duration-200 hover:scale-110 hover:shadow-md">
+																		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-gray-500 group-hover:text-red-500 transition-colors">
+																			<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+																		</svg>
+																	</button>
+																	
+																	<div class="confidence-content text-sm text-gray-700 dark:text-gray-300 leading-relaxed space-y-2 px-4 pb-4"></div>
+																	<div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
+																`;
+																
+																// 添加关闭按钮事件
+																resultContainer.querySelector('.close-confidence-btn')?.addEventListener('click', () => {
+																	resultContainer.style.transform = 'scale(0.95)';
+																	resultContainer.style.opacity = '0';
+																	setTimeout(() => {
+																		resultContainer.remove();
+																	}, 200);
+																});
+																
+																responseContent.parentElement.appendChild(resultContainer);
+															}
+															
+															const contentDiv = resultContainer.querySelector('.confidence-content');
+															if (contentDiv) {
+																contentDiv.innerHTML = '<div class="animate-pulse">正在分析...</div>';
+															}
+															
+															// 调用置信检查API
+															let result = '';
+															for await (const chunk of confidenceCheckStream(localStorage.token, {
+																text: text,
+																workflowId: workflowId
+															})) {
+																if (chunk.error) {
+																	throw new Error(chunk.error);
+																}
+																if (chunk.done) {
+																	break;
+																}
+																result += chunk.value.replace('\n', '<br>');
+																if (contentDiv) {
+																	contentDiv.innerHTML = marked.parse(result);
+																}
+															}
+															
+															// 恢复按钮状态
+															button.disabled = false;
+															button.innerHTML = `
+																<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.3" stroke="currentColor" class="w-4 h-4">
+																	<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+																</svg>
+															`;
+															
+														} catch (error) {
+															console.error('置信检查失败:', error);
+															toast.error('置信检查失败: ' + (error instanceof Error ? error.message : String(error)));
+															
+															// 恢复按钮状态
+															button.disabled = false;
+															button.innerHTML = `
+																<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.3" stroke="currentColor" class="w-4 h-4">
+																	<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+																</svg>
+															`;
+														}
+													} else {
+														toast.error('无法获取响应内容或工作流ID');
+													}
+												} else {
+													toast.error('无法找到响应内容或工作流信息');
 												}
-												alert('置信检查功能正在开发，敬请期待~');
-												console.log('置信检查确认');
 											}}
 										>
 											<svg
