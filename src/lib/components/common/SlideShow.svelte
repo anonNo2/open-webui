@@ -2,9 +2,9 @@
 	import { onMount } from 'svelte';
 
 	export let imageUrls = [
-		'/assets/images/banner1.png',
-		'/assets/images/banner2.png',
-		'/assets/images/banner3.png'
+		'/assets/images/zs1.png',
+		'/assets/images/zs2.png',
+		'/assets/images/zs3.png'
 		
 	];
 	export let duration = 5000;
