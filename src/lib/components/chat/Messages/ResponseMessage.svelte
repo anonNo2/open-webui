@@ -42,6 +42,7 @@
 	import Sparkles from '$lib/components/icons/Sparkles.svelte';
 
 	import DeleteConfirmDialog from '$lib/components/common/ConfirmDialog.svelte';
+	import Modal from '$lib/components/common/Modal.svelte';
 
 	import Error from './Error.svelte';
 	import Citations from './Citations.svelte';
@@ -49,6 +50,7 @@
 	import ContentRenderer from './ContentRenderer.svelte';
 	import { KokoroWorker } from '$lib/workers/KokoroWorker';
 	import FileItem from '$lib/components/common/FileItem.svelte';
+	import Markdown from './Markdown.svelte';
 	import { marked } from 'marked';
 
 	interface MessageType {
@@ -137,6 +139,10 @@
 
 	let buttonsContainerElement: HTMLDivElement;
 	let showDeleteConfirm = false;
+	let showConfidenceModal = false;
+	let modalTitle = '';
+	let modalMessage = '';
+	let modalType = 'info'; // 'correct' or 'warning'
 	
 
 	let model = null;
@@ -168,6 +174,13 @@
 		if (res) {
 			toast.success($i18n.t('Copying to clipboard was successful!'));
 		}
+	};
+
+	const openConfidenceModal = (type: string, reason: string) => {
+		modalType = type;
+		modalTitle = type === 'correct' ? '正确项' : '警告项';
+		modalMessage = reason;
+		showConfidenceModal = true;
 	};
 
 	const playAudio = (idx: number) => {
@@ -1328,6 +1341,13 @@
 												const button = e.currentTarget;
 												const responseContent = button?.parentElement?.parentElement?.previousElementSibling?.querySelector('div[id="response-content-container"]');
 
+												// 检查是否已经进行过置信检查
+												const existingContainer = responseContent?.parentElement?.querySelector('.confidence-result-container');
+												if (existingContainer) {
+													toast.info('已完成置信度检查');
+													return;
+												}
+
 												const workflowElements = button?.parentElement?.parentElement?.previousElementSibling?.querySelector('div[data-type="hide"]');
 												console.log(responseContent);
 												console.log(workflowElements);
@@ -1350,38 +1370,65 @@
 																</svg>
 															`;
 															
-															// 通过当前消息的响应内容容器来查找或创建结果容器
-															let resultContainer = responseContent.parentElement?.querySelector('.confidence-result-container');
-															if (!resultContainer) {
-																resultContainer = document.createElement('div');
-																resultContainer.className = 'confidence-result-container mt-4 relative overflow-hidden rounded-xl border border-blue-200/50 dark:border-blue-800/50 bg-gradient-to-br from-blue-50/80 to-indigo-50/60 dark:from-blue-900/20 dark:to-indigo-900/10 backdrop-blur-sm shadow-lg';
-																resultContainer.innerHTML = `
-																	<button class="close-confidence-btn absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 dark:bg-gray-800/80 hover:bg-red-50 dark:hover:bg-red-900/20 border border-gray-200/50 dark:border-gray-700/50 transition-all duration-200 hover:scale-110 hover:shadow-md">
-																		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-gray-500 group-hover:text-red-500 transition-colors">
-																			<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-																		</svg>
-																	</button>
-																	
-																	<div class="confidence-content text-sm text-gray-700 dark:text-gray-300 leading-relaxed space-y-2 px-4 pb-4"></div>
-																	<div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
-																`;
-																
-																// 添加关闭按钮事件
-																resultContainer.querySelector('.close-confidence-btn')?.addEventListener('click', () => {
-																	resultContainer.style.transform = 'scale(0.95)';
-																	resultContainer.style.opacity = '0';
-																	setTimeout(() => {
-																		resultContainer.remove();
-																	}, 200);
-																});
-																
-																responseContent.parentElement.appendChild(resultContainer);
-															}
+															// 创建结果容器
+															const resultContainer = document.createElement('div');
 															
-															const contentDiv = resultContainer.querySelector('.confidence-content');
-															if (contentDiv) {
-																contentDiv.innerHTML = '<div class="animate-pulse">正在分析...</div>';
-															}
+															// 先创建展开状态的容器
+															resultContainer.innerHTML = `
+																<button class="confidence-toggle-btn w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all duration-200 border border-blue-200/40 dark:border-blue-800/40 bg-gradient-to-br from-blue-50/60 to-indigo-50/40 dark:from-blue-900/15 dark:to-indigo-900/5 backdrop-blur-sm shadow-sm" style="display: none;">ℹ️ 置信度报告</button>
+																<div class="confidence-expanded-content" style="display: block;">
+																	<div class="confidence-header flex items-center justify-between px-3 py-2.5 border-b border-blue-200/30 dark:border-blue-700/30 rounded-t-xl">
+																		<h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">🔍  置信度报告</h3>
+																		<button class="minimize-btn w-8 h-8 flex items-center justify-center rounded-full bg-white/80 dark:bg-gray-800/80 hover:bg-blue-50 dark:hover:bg-blue-900/20 border border-gray-200/50 dark:border-gray-700/50 transition-all duration-200 hover:scale-110">
+																			<svg class="w-4 h-4 text-gray-500 hover:text-blue-500 transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+																				<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+																			</svg>
+																		</button>
+																	</div>
+																	<div class="confidence-content text-sm text-gray-700 dark:text-gray-300 leading-relaxed space-y-2 px-4 py-4 rounded-b-xl">
+																		<div class="animate-pulse">正在分析...</div>
+																	</div>
+																	<div class="confidence-bottom-bar absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-b-xl"></div>
+																</div>
+															`;
+															
+															// 设置默认展开状态的容器样式
+															resultContainer.className = 'confidence-result-container mt-4 relative rounded-xl border border-blue-200/50 dark:border-blue-800/50 bg-gradient-to-br from-blue-50/80 to-indigo-50/60 dark:from-blue-900/20 dark:to-indigo-900/10 backdrop-blur-sm shadow-lg';
+															
+															responseContent.parentElement.appendChild(resultContainer);
+															
+															// 添加展开/收缩功能
+															let isCollapsed = false; // 默认展开状态
+															const toggleBtn = resultContainer.querySelector('.confidence-toggle-btn');
+															const expandedContent = resultContainer.querySelector('.confidence-expanded-content');
+															const minimizeBtn = resultContainer.querySelector('.minimize-btn');
+															const confidenceContent = resultContainer.querySelector('.confidence-content');
+															
+															// 展开按钮事件
+															toggleBtn?.addEventListener('click', () => {
+																if (isCollapsed) {
+																	// 展开状态
+																	toggleBtn.style.display = 'none';
+																	expandedContent.style.display = 'block';
+																	// 展开时给容器添加背景样式
+																	resultContainer.className = 'confidence-result-container mt-4 relative rounded-xl border border-blue-200/50 dark:border-blue-800/50 bg-gradient-to-br from-blue-50/80 to-indigo-50/60 dark:from-blue-900/20 dark:to-indigo-900/10 backdrop-blur-sm shadow-lg';
+																	isCollapsed = false;
+																}
+															});
+															
+															// 收缩按钮事件
+															minimizeBtn?.addEventListener('click', () => {
+																if (!isCollapsed) {
+																	// 收缩状态
+																	toggleBtn.style.display = 'flex';
+																	expandedContent.style.display = 'none';
+																	// 收缩时移除容器背景样式
+																	resultContainer.className = 'confidence-result-container mt-2';
+																	isCollapsed = true;
+																}
+															});
+															
+															const contentDiv = resultContainer.querySelector('.confidence-expanded-content .confidence-content');
 															
 															// 调用置信检查API
 															let result = '';
@@ -1400,6 +1447,145 @@
 																	contentDiv.innerHTML = marked.parse(result);
 																}
 															}
+
+															const correctItems = resultContainer.querySelectorAll('.correct-item');
+															const warningItems = resultContainer.querySelectorAll('.warning-item');
+															
+															// 存储所有需要处理的段落，避免重复处理
+															const processedParagraphs = new Set();
+															
+															// 查找距离当前元素最近的chat-assistant div中包含query的p元素
+															function findContentParagraph(currentElement, area, content) {
+																// 1. 找到距离当前元素最近的带chat-assistant类的div
+																const chatAssistantDiv = currentElement.closest('.chat-assistant');
+																if (!chatAssistantDiv) {
+																	console.warn('未找到带chat-assistant类的父级div');
+																	return null;
+																}
+																
+																// 2. 将area格式化为[3][7][19]格式，并取content的最后5个字组成query
+																const formattedArea = area.split(',').map((num) => `[${num.trim()}]`).join('').slice(1,-1);
+																const last5Chars = content.slice(-5).replace(/\*/g,'').trim();
+																const query =  last5Chars + formattedArea;
+																
+																console.log('查询字符串:', query);
+																
+																// 3. 在该div下查找所有p和li元素
+																const elements = chatAssistantDiv.querySelectorAll('p, li');
+																
+																// 4. 筛选出最小单位的元素（没有子HTML元素的纯文本元素）
+																const leafElements = Array.from(elements).filter(element => {
+																	// 检查元素是否包含p或li子元素
+																	return !element.querySelector('p, li');
+																});
+																
+																// 5. 查找包含query的最小单位元素
+																for (const element of leafElements) {
+																	const elementText = element.textContent || element.innerText;
+																	if (elementText.includes(query)) {
+																		return element;
+																	}
+																}
+																console.warn(`未找到包含查询字符串"${query}"的p元素`);
+																return null;
+															}
+
+															// 重新绑定所有置信度按钮的事件监听器
+															function rebindAllConfidenceButtons(paragraph) {
+																const allButtons = paragraph.querySelectorAll('.confidence-button');
+																allButtons.forEach(button => {
+																	// 移除旧的事件监听器（如果有的话）
+																	button.replaceWith(button.cloneNode(true));
+																	
+																	// 重新获取按钮引用并添加事件监听器
+																	const newButton = paragraph.querySelector(`[data-button-id="${button.getAttribute('data-button-id')}"]`);
+																	if (newButton) {
+																		newButton.addEventListener('click', () => {
+																			console.log('点击置信度按钮:', newButton);
+																			const encodedReason = newButton.getAttribute('data-reason-encoded');
+																			const decodedReason = decodeURIComponent(encodedReason || '');
+																			const type = newButton.getAttribute('data-type');
+																			openConfidenceModal(type, decodedReason);
+																		});
+																	}
+																});
+															}
+
+															// 处理所有正确项
+															for (const item of correctItems) {
+																const content = item.querySelector('.correct-content')?.textContent;
+																const area = item.querySelector('.correct-area')?.textContent;
+																const reason = item.querySelector('.correct-reason')?.textContent;
+																
+																if (!content || !area || !reason) continue;
+																
+																// 格式化area
+																const formattedArea = area.split(',').map((num) => `[${num.trim()}]`).join('').slice(1,-1);
+																
+																// 使用函数查找对应的p元素
+																const targetParagraph = findContentParagraph(item, area, content);
+																if (targetParagraph) {
+																	console.log('找到目标段落:', targetParagraph);
+																	targetParagraph.style.backgroundColor = '#e6ffe6'; // 高亮显示
+																	
+																	// 基于当前HTML进行替换
+																	const currentHTML = targetParagraph.innerHTML;
+																	if (currentHTML.includes(formattedArea)) {
+																		// 生成唯一ID避免重复
+																		const uniqueId = `correct-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+																		const buttonHTML = `<button class="confidence-button bg-green-100 hover:bg-green-200 border border-green-300 rounded px-2 py-1 text-xs text-green-800 font-medium transition-colors cursor-pointer" data-type="correct" data-reason-encoded="${encodeURIComponent(reason)}" data-button-id="${uniqueId}">${formattedArea}</button>`;
+																		targetParagraph.innerHTML = currentHTML.replaceAll(formattedArea, buttonHTML);
+																		
+																		// 标记这个段落需要重新绑定事件
+																		processedParagraphs.add(targetParagraph);
+																	}
+																}
+															}
+															
+															// 处理所有警告项
+															for (const item of warningItems) {
+																const content = item.querySelector('.warning-content')?.textContent;
+																const area = item.querySelector('.warning-area')?.textContent;
+																const reason = item.querySelector('.warning-reason')?.textContent;
+																
+																if (!content || !area || !reason) continue;
+																
+																// 格式化area
+																const formattedArea = area.split(',').map((num) => `[${num.trim()}]`).join('').slice(1,-1);
+																
+																// 使用函数查找对应的p元素（错误项目用红色高亮）
+																const targetParagraph = findContentParagraph(item, area, content);
+																if (targetParagraph) {
+																	console.log('找到目标段落:', targetParagraph);
+																	targetParagraph.style.backgroundColor = '#ffe6e6'; // 错误项目用红色高亮
+																	
+																	// 基于当前HTML进行替换
+																	const currentHTML = targetParagraph.innerHTML;
+																	if (currentHTML.includes(formattedArea)) {
+																		// 生成唯一ID避免重复
+																		const uniqueId = `warning-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+																		const buttonHTML = `<button class="confidence-button bg-red-100 hover:bg-red-200 border border-red-300 rounded px-2 py-1 text-xs text-red-800 font-medium transition-colors cursor-pointer" data-type="warning" data-reason-encoded="${encodeURIComponent(reason)}" data-button-id="${uniqueId}">${formattedArea}</button>`;
+																		targetParagraph.innerHTML = currentHTML.replaceAll(formattedArea, buttonHTML);
+																		
+																		// 标记这个段落需要重新绑定事件
+																		processedParagraphs.add(targetParagraph);
+																	}
+																}
+															}
+															
+															// 最后，为所有处理过的段落重新绑定事件监听器
+															processedParagraphs.forEach(paragraph => {
+																const allButtons = paragraph.querySelectorAll('.confidence-button');
+																allButtons.forEach(button => {
+																	button.addEventListener('click', () => {
+																		console.log('点击置信度按钮:', button);
+																		const encodedReason = button.getAttribute('data-reason-encoded');
+																		const decodedReason = decodeURIComponent(encodedReason || '');
+																		const type = button.getAttribute('data-type');
+																		openConfidenceModal(type, decodedReason);
+																	});
+																});
+															});
 															
 															// 恢复按钮状态
 															button.disabled = false;
@@ -1528,6 +1714,40 @@
 		</div>
 	</div>
 {/key}
+
+<!-- 置信度信息模态框 -->
+<Modal bind:show={showConfidenceModal} size="sm">
+	<div class="p-6">
+		<div class="flex items-center mb-4">
+			<div class="w-8 h-8 rounded-full {modalType === 'correct' ? 'bg-green-100' : 'bg-red-100'} flex items-center justify-center mr-3">
+				{#if modalType === 'correct'}
+					<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+					</svg>
+				{:else}
+					<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.098 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+					</svg>
+				{/if}
+			</div>
+			<h2 class="text-lg font-semibold text-gray-900 dark:text-white">{modalTitle}</h2>
+		</div>
+		<div class="mb-6">
+			<div class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed markdown-prose-xs max-w-none">
+				<Markdown id="confidence-modal-{message.id}" content={modalMessage} />
+			</div>
+		</div>
+		<div class="flex justify-end">
+			<button
+				type="button"
+				class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
+				on:click={() => showConfidenceModal = false}
+			>
+				关闭
+			</button>
+		</div>
+	</div>
+</Modal>
 
 <style>
 	.buttons::-webkit-scrollbar {

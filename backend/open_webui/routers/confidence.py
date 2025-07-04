@@ -35,13 +35,13 @@ def get_analysis_result(workflow_id,results):
     error_items = [i for i in all_outputs if i['confidence_results']['status'] == 'no']
     error_items_content = [[i["content"].replace("#",""),i["confidence_results"]["reason"],i["ref_ids"]] for i in error_items]
     error_items_content = '\n\n'.join([
-        f'<div style="display:flex; gap:20px; margin:10px 0">\n'
+        f'<div style="display:flex; gap:20px; margin:10px 0" class="warning-item">\n'
         f'<div style="flex:1; border:1px solid #ffa39e; background:#fff2f0; padding:10px; border-radius:4px">\n'
-        f'<div style="font-weight:bold">内容：</div>\n{i[0]}\n'
+        f'<div style="font-weight:bold">内容：</div><span class="warning-content">\n{i[0]}\n</span>'
         f'</div>\n'
         f'<div style="flex:1; border:1px solid #91caff; background:#e6f4ff; padding:10px; border-radius:4px">\n' 
-        f'<div style="font-weight:bold">参考范围：</div>{i[2]}\n'
-        f'<div style="font-weight:bold">存疑原因：</div>\n{i[1]}\n'
+        f'<div style="font-weight:bold">参考范围：</div><span class="warning-area">{i[2]}</span>\n'
+        f'<div style="font-weight:bold">存疑原因：</div><span class="warning-reason">\n{i[1]}</span>\n'
         f'</div>\n'
         f'</div>' for i in error_items_content])
     error_items_content = error_items_content if error_items_content else '无存疑事实点'
@@ -53,13 +53,13 @@ def get_analysis_result(workflow_id,results):
     correct_items = [i for i in all_outputs if i['confidence_results']['status'] == 'yes']
     correct_items_content = [[i["content"].replace("#",""),i["confidence_results"]["reason"],i["ref_ids"]] for i in correct_items]
     correct_items_content = '\n\n'.join([
-        f'<div style="display:flex; gap:20px; margin:10px 0">\n'
+        f'<div style="display:flex; gap:20px; margin:10px 0" class="correct-item">\n'
         f'<div style="flex:1; border:1px solid #b7eb8f; background:#f6ffed; padding:10px; border-radius:4px">\n'
-        f'<div style="font-weight:bold">内容：</div>\n{i[0]}\n'
+        f'<div style="font-weight:bold">内容：</div><span class="correct-content">\n{i[0]}\n</span>'
         f'</div>\n'
         f'<div style="flex:1; border:1px solid #95de64; background:#f6ffed; padding:10px; border-radius:4px">\n' 
-        f'<div style="font-weight:bold">参考范围：</div>{i[2]}\n'
-        f'<div style="font-weight:bold">论证：</div>\n{i[1]}\n'
+        f'<div style="font-weight:bold">参考范围：</div><span class="correct-area">{i[2]}</span>\n'
+        f'<div style="font-weight:bold">论证：</div><span class="correct-reason">\n{i[1]}\n</span>'
         f'</div>\n'
         f'</div>' for i in correct_items_content])
     correct_items_content = correct_items_content if correct_items_content else '无正确事实点'    
@@ -142,7 +142,7 @@ async def simulate_confidence_check(text: str, workflow_id: str) -> AsyncGenerat
         title_data = redis_conn.get(title_redis_key)
 
         if not search_data or not content_data or not content_time or not title_data:
-            yield f"data: {json.dumps({'choices': [{'delta': {'content': f'⚠️ 未找到 key: {workflow_id} 的数据(仅可对生成时间一天内的联网参考内容进行置信度检查)' + chr(10)}}]})}\n\n"
+            yield f"data: {json.dumps({'choices': [{'delta': {'content': f'[ERROR]⚠️ 未找到 key: {workflow_id} 的数据(仅可对生成时间一天内的联网参考内容进行置信度检查)' + chr(10)}}]})}\n\n"
             yield "data: [DONE]\n\n"
             return
 
@@ -156,14 +156,14 @@ async def simulate_confidence_check(text: str, workflow_id: str) -> AsyncGenerat
             
         else:
             # 如果没有找到数据，发送提示信息
-            yield f"data: {json.dumps({'choices': [{'delta': {'content': f'⚠️ 未找到 key: {workflow_id} 的数据(仅可对生成时间一天内的联网参考内容进行置信度检查)' + chr(10)}}]})}\n\n"
+            yield f"data: {json.dumps({'choices': [{'delta': {'content': f'[ERROR]⚠️ 未找到 key: {workflow_id} 的数据(仅可对生成时间一天内的联网参考内容进行置信度检查)' + chr(10)}}]})}\n\n"
              # 发送完成信号
             yield "data: [DONE]\n\n"
             return
             
     except Exception as e:
         # 如果 Redis 操作失败，发送错误信息但继续执行
-        yield f"data: {json.dumps({'choices': [{'delta': {'content': f'❌ Redis 读取失败: {str(e)}' + chr(10)}}]})}\n\n"
+        yield f"data: {json.dumps({'choices': [{'delta': {'content': f'[ERROR]❌ Redis 读取失败: {str(e)}' + chr(10)}}]})}\n\n"
          # 发送完成信号
         yield "data: [DONE]\n\n"
         return
@@ -242,16 +242,14 @@ async def simulate_confidence_check(text: str, workflow_id: str) -> AsyncGenerat
         analysis_result = get_analysis_result(workflow_id,results)
 
         redis_conn.set(analysis_redis_key,json.dumps(results,ensure_ascii=False))
-        # 分块发送结果
-        chunks = [analysis_result[i:i+50] for i in range(0, len(analysis_result), 50)]
-        for chunk in chunks:
-            yield f"data: {json.dumps({'choices': [{'delta': {'content': chunk}}]})}\n\n"
+   
+        yield f"data: {json.dumps({'choices': [{'delta': {'content': analysis_result}}]})}\n\n"
         
         # 发送完成信号
         yield "data: [DONE]\n\n"
         return
     except Exception as e:
-        yield f"data: {json.dumps({'choices': [{'delta': {'content': f'❌ 置信检查失败: {str(e)}' + chr(10)}}]})}\n\n"
+        yield f"data: {json.dumps({'choices': [{'delta': {'content': f'[ERROR]❌ 置信检查失败: {str(e)}' + chr(10)}}]})}\n\n"
         yield "data: [DONE]\n\n"
         return
 
