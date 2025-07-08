@@ -88,6 +88,19 @@
 	export let knowledgeBaseEnabled = false;
 	export let deepWebSearchEnabled = false;
 	export let deepResearchEnabled = false;
+	
+	// 添加深度网络搜索模式状态
+	let deepWebSearchMode = 'auto'; // 'auto', 'on', 'off'
+	let showDeepWebSearchDropdown = false;
+	
+	// 根据模式设置 deepWebSearchEnabled
+	$: {
+		if (deepWebSearchMode === 'auto' || deepWebSearchMode === 'on') {
+			deepWebSearchEnabled = true;
+		} else {
+			deepWebSearchEnabled = false;
+		}
+	}
 	$: onChange({
 		prompt,
 		files: files.filter((file) => file.type !== 'image'),
@@ -98,8 +111,7 @@
 		codeInterpreterEnabled,
 		knowledgeBaseEnabled,
 		deepWebSearchEnabled,
-		deepResearchEnabled,
-		codeInterpreterEnabled
+		deepResearchEnabled
 	});
 
 	let showTools = false;
@@ -328,6 +340,20 @@
 		if (event.key === 'Escape') {
 			console.log('Escape');
 			dragged = false;
+			showDeepWebSearchDropdown = false;
+		}
+	};
+
+	const handleClickOutside = (event) => {
+		if (!showDeepWebSearchDropdown) return;
+		
+		const dropdown = document.getElementById('deep-web-search-dropdown');
+		const button = document.getElementById('deep-web-search-button');
+		
+		if (event.target && dropdown && button) {
+			if (!dropdown.contains(event.target) && !button.contains(event.target)) {
+				showDeepWebSearchDropdown = false;
+			}
 		}
 	};
 
@@ -370,6 +396,7 @@
 		}, 0);
 
 		window.addEventListener('keydown', handleKeyDown);
+		window.addEventListener('click', handleClickOutside);
 
 		await tick();
 
@@ -383,6 +410,7 @@
 	onDestroy(() => {
 		console.log('destroy');
 		window.removeEventListener('keydown', handleKeyDown);
+		window.removeEventListener('click', handleClickOutside);
 
 		const dropzoneElement = document.getElementById('chat-container');
 
@@ -1299,7 +1327,7 @@
 											</button>
 										</InputMenu>
 
-										<div class="flex gap-1 items-center overflow-x-auto scrollbar-none flex-1">
+																					<div class="flex gap-1 items-center overflow-x-auto overflow-y-visible scrollbar-none flex-1">
 											{#if toolServers.length + selectedToolIds.length > 0}
 												<Tooltip
 													content={$i18n.t('{{COUNT}} Available Tools', {
@@ -1365,7 +1393,7 @@
 													</Tooltip>
 												{/each}
 
-												{#if (atSelectedModel?.id ? [atSelectedModel.id] : selectedModels).length === webSearchCapableModels.length && $config?.features?.enable_web_search && ($_user.role === 'admin' || $_user?.permissions?.features?.web_search)}
+												<!-- {#if (atSelectedModel?.id ? [atSelectedModel.id] : selectedModels).length === webSearchCapableModels.length && $config?.features?.enable_web_search && ($_user.role === 'admin' || $_user?.permissions?.features?.web_search)}
 													<Tooltip content={$i18n.t('Search the internet')} placement="top">
 														<button
 															on:click|preventDefault={() => (webSearchEnabled = !webSearchEnabled)}
@@ -1382,7 +1410,7 @@
 															>
 														</button>
 													</Tooltip>
-												{/if}
+												{/if} -->
 
 												{#if (atSelectedModel?.id ? [atSelectedModel.id] : selectedModels).length === imageGenerationCapableModels.length && $config?.features?.enable_image_generation && ($_user.role === 'admin' || $_user?.permissions?.features?.image_generation)}
 													<Tooltip content={$i18n.t('Generate an image')} placement="top">
@@ -1403,7 +1431,7 @@
 													</Tooltip>
 												{/if}
 
-												{#if (atSelectedModel?.id ? [atSelectedModel.id] : selectedModels).length === codeInterpreterCapableModels.length && $config?.features?.enable_code_interpreter && ($_user.role === 'admin' || $_user?.permissions?.features?.code_interpreter)}
+												<!-- {#if (atSelectedModel?.id ? [atSelectedModel.id] : selectedModels).length === codeInterpreterCapableModels.length && $config?.features?.enable_code_interpreter && ($_user.role === 'admin' || $_user?.permissions?.features?.code_interpreter)}
 													<Tooltip content={$i18n.t('Execute code for analysis')} placement="top">
 														<button
 															on:click|preventDefault={() =>
@@ -1420,7 +1448,7 @@
 															>
 														</button>
 													</Tooltip>
-												{/if}
+												{/if} -->
 												<!-- MARK调试 -->
 												{#if $config?.features?.enable_knowledge_base && ($_user.role === 'admin' || $_user?.permissions?.features?.knowledge_base)}
 												<!-- {#if true} -->
@@ -1453,32 +1481,122 @@
 
 												<!-- MARK 添加TAG -->
 												{#if $config?.features?.enable_deep_web_search && ($_user.role === 'admin' || $_user?.permissions?.features?.deep_web_search)}
-													<Tooltip content={$i18n.t('Search the deep web')} placement="top">
-														<button
-															on:click|preventDefault={() =>
-																(deepWebSearchEnabled = !deepWebSearchEnabled)}
-															type="button"
-															class="px-1.5 @sm:px-2.5 py-1.5 flex gap-1.5 items-center text-sm rounded-full font-medium transition-colors duration-300 focus:outline-hidden max-w-full overflow-hidden {deepWebSearchEnabled
-																? 'bg-blue-100 dark:bg-blue-500/20 text-blue-500 dark:text-blue-400'
-																: 'bg-transparent text-gray-600 dark:text-gray-300 border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 '}"
-														>
-															<svg
-																xmlns="http://www.w3.org/2000/svg"
-																viewBox="0 0 24 24"
-																fill="none"
-																stroke="currentColor"
-																stroke-width="1.75"
-																class="size-5"
+													<div class="relative">
+														<Tooltip content="深度网络搜索" placement="top">
+															<button
+																id="deep-web-search-button"
+																on:click|preventDefault={(e) => {
+																	showDeepWebSearchDropdown = !showDeepWebSearchDropdown;
+																	
+																	if (showDeepWebSearchDropdown) {
+																		// 在setTimeout之前获取button引用
+																		const button = e.currentTarget;
+																		
+																		// 等待下一个渲染周期，然后智能定位下拉菜单
+																		setTimeout(() => {
+																			const dropdown = document.getElementById('deep-web-search-dropdown');
+																			
+																			if (button && dropdown) {
+																				const buttonRect = button.getBoundingClientRect();
+																				
+																				// 检查是否有对话内容：如果有user-message元素，说明有对话，向上显示
+																				const hasMessages = document.querySelector('.user-message') !== null;
+																				const showAbove = hasMessages;
+																				
+																				
+																				
+																				if (showAbove) {
+																					// 向上显示（有对话内容时）
+																					dropdown.style.left = buttonRect.left + 'px';
+																					dropdown.style.top = (buttonRect.top - 120 - 8) + 'px';
+																					dropdown.style.transformOrigin = 'bottom left';
+																				} else {
+																					// 向下显示（没有对话内容时）- 添加适当的间距
+																					// dropdown.style.top = (buttonRect.bottom - 120 - 8) + 'px';
+																					// dropdown.style.transformOrigin = 'top left';
+																				}
+																			}
+																		}, 0);
+																	}
+																}}
+																type="button"
+																class="px-1.5 @sm:px-2.5 py-1.5 flex gap-1.5 items-center text-sm rounded-full font-medium transition-colors duration-300 focus:outline-hidden max-w-full overflow-hidden {deepWebSearchEnabled
+																	? 'bg-blue-100 dark:bg-blue-500/20 text-blue-500 dark:text-blue-400'
+																	: 'bg-transparent text-gray-600 dark:text-gray-300 border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 '}"
 															>
-																<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" />
-																<path stroke-linecap="round" stroke-linejoin="round" d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z" />
-															</svg>
-															<span
-																class="hidden @sm:block whitespace-nowrap overflow-hidden text-ellipsis translate-y-[0.5px] mr-0.5"
-																>{$i18n.t('Deep Web Search')}</span
+																<svg
+																	xmlns="http://www.w3.org/2000/svg"
+																	viewBox="0 0 24 24"
+																	fill="none"
+																	stroke="currentColor"
+																	stroke-width="1.75"
+																	class="size-5"
+																>
+																	<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" />
+																	<path stroke-linecap="round" stroke-linejoin="round" d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z" />
+																</svg>
+																<span
+																	class="hidden @sm:block whitespace-nowrap overflow-hidden text-ellipsis translate-y-[0.5px] mr-0.5"
+																	>
+																	{#if deepWebSearchMode === 'auto'}
+																		联网搜索-自动
+																	{:else if deepWebSearchMode === 'on'}
+																		联网搜索-开
+																	{:else}
+																		联网搜索-关
+																	{/if}
+																</span>
+																<!-- 下拉箭头 -->
+																<svg class="size-3 ml-1" viewBox="0 0 12 12" fill="currentColor">
+																	<path d="M3.22 4.22a.75.75 0 0 1 1.06 0L6 5.94l1.72-1.72a.75.75 0 1 1 1.06 1.06L6.53 7.53a.75.75 0 0 1-1.06 0L3.22 5.28a.75.75 0 0 1 0-1.06z" />
+																</svg>
+															</button>
+														</Tooltip>
+														
+														<!-- 下拉菜单 -->
+														{#if showDeepWebSearchDropdown}
+															<div 
+																id="deep-web-search-dropdown" 
+																class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl"
+																style="position: fixed; z-index: 999999; min-width: 150px;"
 															>
-														</button>
-													</Tooltip>
+																<button
+																	type="button"
+																	class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 rounded-t-lg {deepWebSearchMode === 'auto' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}"
+																	on:click={() => {
+																		deepWebSearchMode = 'auto';
+																		showDeepWebSearchDropdown = false;
+																		deepWebSearchEnabled = true;
+																		
+																	}}
+																>
+																	联网搜索-自动
+																</button>
+																<button
+																	type="button"
+																	class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 {deepWebSearchMode === 'on' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}"
+																	on:click={() => {
+																		deepWebSearchMode = 'on';
+																		showDeepWebSearchDropdown = false;
+																		deepWebSearchEnabled = true;
+																	}}
+																>
+																	联网搜索-开
+																</button>
+																<button
+																	type="button"
+																	class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 rounded-b-lg {deepWebSearchMode === 'off' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}"
+																	on:click={() => {
+																		deepWebSearchMode = 'off';
+																		showDeepWebSearchDropdown = false;
+																		deepWebSearchEnabled = false;
+																	}}
+																>
+																	联网搜索-关
+																</button>
+															</div>
+														{/if}
+													</div>
 												{/if}	
 												<!-- MARK 添加TAG -->
 												{#if $config?.features?.enable_deep_research && ($_user.role === 'admin' || $_user?.permissions?.features?.deep_research)}

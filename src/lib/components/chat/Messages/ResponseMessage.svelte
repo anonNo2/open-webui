@@ -1465,7 +1465,7 @@
 																
 																// 2. 将area格式化为[3][7][19]格式，并取content的最后5个字组成query
 																const formattedArea = area.split(',').map((num) => `[${num.trim()}]`).join('').slice(1,-1);
-																const last5Chars = content.slice(-5).replace(/\*/g,'').trim();
+																const last5Chars = content.slice(-5).replace(/[*_`~#\[\]()]/g,'').trim();
 																const query =  last5Chars + formattedArea;
 																
 																console.log('查询字符串:', query);
@@ -1511,6 +1511,9 @@
 																});
 															}
 
+															// 收集所有置信度项目
+															const allConfidenceItems = [];
+															
 															// 处理所有正确项
 															for (const item of correctItems) {
 																const content = item.querySelector('.correct-content')?.textContent;
@@ -1525,20 +1528,12 @@
 																// 使用函数查找对应的p元素
 																const targetParagraph = findContentParagraph(item, area, content);
 																if (targetParagraph) {
-																	console.log('找到目标段落:', targetParagraph);
-																	targetParagraph.style.backgroundColor = '#e6ffe6'; // 高亮显示
-																	
-																	// 基于当前HTML进行替换
-																	const currentHTML = targetParagraph.innerHTML;
-																	if (currentHTML.includes(formattedArea)) {
-																		// 生成唯一ID避免重复
-																		const uniqueId = `correct-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-																		const buttonHTML = `<button class="confidence-button bg-green-100 hover:bg-green-200 border border-green-300 rounded px-2 py-1 text-xs text-green-800 font-medium transition-colors cursor-pointer" data-type="correct" data-reason-encoded="${encodeURIComponent(reason)}" data-button-id="${uniqueId}">${formattedArea}</button>`;
-																		targetParagraph.innerHTML = currentHTML.replaceAll(formattedArea, buttonHTML);
-																		
-																		// 标记这个段落需要重新绑定事件
-																		processedParagraphs.add(targetParagraph);
-																	}
+																	allConfidenceItems.push({
+																		paragraph: targetParagraph,
+																		formattedArea,
+																		reason,
+																		type: 'correct'
+																	});
 																}
 															}
 															
@@ -1553,24 +1548,105 @@
 																// 格式化area
 																const formattedArea = area.split(',').map((num) => `[${num.trim()}]`).join('').slice(1,-1);
 																
-																// 使用函数查找对应的p元素（错误项目用红色高亮）
+																// 使用函数查找对应的p元素
 																const targetParagraph = findContentParagraph(item, area, content);
 																if (targetParagraph) {
-																	console.log('找到目标段落:', targetParagraph);
-																	targetParagraph.style.backgroundColor = '#ffe6e6'; // 错误项目用红色高亮
+																	allConfidenceItems.push({
+																		paragraph: targetParagraph,
+																		formattedArea,
+																		reason,
+																		type: 'warning'
+																	});
+																}
+															}
+															
+															// 按段落分组处理
+															const paragraphGroups = new Map();
+															for (const item of allConfidenceItems) {
+																if (!paragraphGroups.has(item.paragraph)) {
+																	paragraphGroups.set(item.paragraph, []);
+																}
+																paragraphGroups.get(item.paragraph).push(item);
+															}
+															
+															// 为每个段落处理所有相关的置信度项目
+															for (const [paragraph, items] of paragraphGroups) {
+																console.log('处理段落:', paragraph, '包含', items.length, '个置信度项目');
+																
+																// 设置段落背景色（如果有警告则用红色，否则用绿色）
+																const hasWarning = items.some(item => item.type === 'warning');
+																paragraph.style.backgroundColor = hasWarning ? '#ffe6e6' : '#e6ffe6';
+																
+																let currentHTML = paragraph.innerHTML;
+																
+																// 为每个置信度项目进行精确定位和替换
+																for (const item of items) {
+																	const { formattedArea, reason, type } = item;
 																	
-																	// 基于当前HTML进行替换
-																	const currentHTML = targetParagraph.innerHTML;
-																	if (currentHTML.includes(formattedArea)) {
-																		// 生成唯一ID避免重复
-																		const uniqueId = `warning-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-																		const buttonHTML = `<button class="confidence-button bg-red-100 hover:bg-red-200 border border-red-300 rounded px-2 py-1 text-xs text-red-800 font-medium transition-colors cursor-pointer" data-type="warning" data-reason-encoded="${encodeURIComponent(reason)}" data-button-id="${uniqueId}">${formattedArea}</button>`;
-																		targetParagraph.innerHTML = currentHTML.replaceAll(formattedArea, buttonHTML);
+																	// 获取原始的content和area来精确定位
+																	const originalItem = [...correctItems, ...warningItems].find(origItem => {
+																		const origContent = origItem.querySelector(`.${type}-content`)?.textContent;
+																		const origArea = origItem.querySelector(`.${type}-area`)?.textContent;
+																		const origReason = origItem.querySelector(`.${type}-reason`)?.textContent;
+																		return origContent && origArea && origReason === reason;
+																	});
+																	
+																	if (originalItem) {
+																		const content = originalItem.querySelector(`.${type}-content`)?.textContent;
+																		const area = originalItem.querySelector(`.${type}-area`)?.textContent;
 																		
-																		// 标记这个段落需要重新绑定事件
-																		processedParagraphs.add(targetParagraph);
+																		// 使用content的最后5个字符作为定位上下文
+																		const last5Chars = content.slice(-5).replace(/[*_`~#\[\]()]/g,'').trim();
+																		const contextQuery = last5Chars + formattedArea;
+																		
+																		console.log('查找上下文:', contextQuery, '在段落中');
+																		
+																		// 在当前HTML中查找这个特定的上下文
+																		const contextIndex = currentHTML.indexOf(contextQuery);
+																		if (contextIndex !== -1) {
+																			// 找到了上下文，现在在这个上下文中查找formattedArea
+																			const beforeContext = currentHTML.substring(0, contextIndex);
+																			const afterContext = currentHTML.substring(contextIndex);
+																			
+																			// 在afterContext中查找第一个formattedArea并替换
+																			const areaIndex = afterContext.indexOf(formattedArea);
+																			if (areaIndex !== -1) {
+																				const beforeArea = afterContext.substring(0, areaIndex);
+																				const afterArea = afterContext.substring(areaIndex + formattedArea.length);
+																				
+																				// 生成唯一ID避免重复
+																				const uniqueId = `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+																				const bgColor = type === 'correct' ? 'bg-green-100 hover:bg-green-200 border-green-300 text-green-800' : 'bg-red-100 hover:bg-red-200 border-red-300 text-red-800';
+																				const buttonHTML = `<button class="confidence-button ${bgColor} border rounded px-2 py-1 text-xs font-medium transition-colors cursor-pointer" data-type="${type}" data-reason-encoded="${encodeURIComponent(reason)}" data-button-id="${uniqueId}">${formattedArea}</button>`;
+																				
+																				// 重新构建HTML
+																				currentHTML = beforeContext + beforeArea + buttonHTML + afterArea;
+																				
+																				console.log('成功替换:', formattedArea, '在上下文:', contextQuery);
+																			} else {
+																				console.warn('在上下文中未找到引用:', formattedArea);
+																			}
+																		} else {
+																			console.warn('未找到上下文:', contextQuery);
+																			
+																			// 如果找不到精确上下文，回退到简单替换第一个匹配项
+																			if (currentHTML.includes(formattedArea)) {
+																				const uniqueId = `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+																				const bgColor = type === 'correct' ? 'bg-green-100 hover:bg-green-200 border-green-300 text-green-800' : 'bg-red-100 hover:bg-red-200 border-red-300 text-red-800';
+																				const buttonHTML = `<button class="confidence-button ${bgColor} border rounded px-2 py-1 text-xs font-medium transition-colors cursor-pointer" data-type="${type}" data-reason-encoded="${encodeURIComponent(reason)}" data-button-id="${uniqueId}">${formattedArea}</button>`;
+																				
+																				currentHTML = currentHTML.replace(formattedArea, buttonHTML);
+																				console.log('回退替换:', formattedArea);
+																			}
+																		}
 																	}
 																}
+																
+																// 更新段落HTML
+																paragraph.innerHTML = currentHTML;
+																
+																// 标记这个段落需要重新绑定事件
+																processedParagraphs.add(paragraph);
 															}
 															
 															// 最后，为所有处理过的段落重新绑定事件监听器
