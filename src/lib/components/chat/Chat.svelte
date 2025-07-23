@@ -1668,17 +1668,17 @@
 					// MARK 添加TAG
 					knowledge_base:
 						$config?.features?.enable_knowledge_base &&
-						($user.role in ['admin', 'user'] || $user?.permissions?.features?.knowledge_base)
+						(['admin', 'user'].includes($user.role) || $user?.permissions?.features?.knowledge_base)
 							? knowledgeBaseEnabled
 							: false,
 					deep_web_search:
 						$config?.features?.enable_deep_web_search &&
-						($user.role in ['admin', 'user'] || $user?.permissions?.features?.deep_web_search)
+						(['admin', 'user'].includes($user.role) || $user?.permissions?.features?.deep_web_search)
 							? deepWebSearchEnabled
 							: false,
 					deep_research:
 						$config?.features?.enable_deep_research &&
-						($user.role in ['admin', 'user'] || $user?.permissions?.features?.deep_research)
+						(['admin', 'user'].includes($user.role) || $user?.permissions?.features?.deep_research)
 							? deepResearchEnabled
 							: false,
 					web_search:

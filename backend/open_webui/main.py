@@ -1326,7 +1326,7 @@ async def get_app_config(request: Request):
     if user is None:
         onboarding = user_count == 0
 
-    return {
+    config_results = {
         **({"onboarding": True} if onboarding else {}),
         "status": True,
         "name": app.state.WEBUI_NAME,
@@ -1417,6 +1417,8 @@ async def get_app_config(request: Request):
             else {}
         ),
     }
+
+    return config_results
 
 
 class UrlForm(BaseModel):

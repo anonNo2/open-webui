@@ -29,6 +29,9 @@ from open_webui.env import (
     SRC_LOG_LEVELS,
 )
 
+# Import CORS configuration
+from open_webui.config import CORS_ALLOW_ORIGIN
+
 
 logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
 log = logging.getLogger(__name__)
@@ -45,7 +48,7 @@ if WEBSOCKET_MANAGER == "redis":
     else:
         mgr = socketio.AsyncRedisManager(WEBSOCKET_REDIS_URL)
     sio = socketio.AsyncServer(
-        cors_allowed_origins=[],
+        cors_allowed_origins=CORS_ALLOW_ORIGIN,
         async_mode="asgi",
         transports=(["websocket"] if ENABLE_WEBSOCKET_SUPPORT else ["polling"]),
         allow_upgrades=ENABLE_WEBSOCKET_SUPPORT,
@@ -54,7 +57,7 @@ if WEBSOCKET_MANAGER == "redis":
     )
 else:
     sio = socketio.AsyncServer(
-        cors_allowed_origins=[],
+        cors_allowed_origins=CORS_ALLOW_ORIGIN,
         async_mode="asgi",
         transports=(["websocket"] if ENABLE_WEBSOCKET_SUPPORT else ["polling"]),
         allow_upgrades=ENABLE_WEBSOCKET_SUPPORT,
@@ -145,7 +148,7 @@ async def periodic_usage_pool_cleanup():
 
 app = socketio.ASGIApp(
     sio,
-    socketio_path="/ws/socket.io",
+    socketio_path="/socket.io",
 )
 
 

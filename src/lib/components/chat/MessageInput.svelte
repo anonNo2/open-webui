@@ -14,11 +14,11 @@
 		showSidebar,
 		models,
 		config,
-		showCallOverlay,
+		showCallOverlay, /* CALL_RELATED_IMPORT: Call 功能相关的状态管理 */
 		tools,
 		user as _user,
-		showControls,
-		TTSWorker
+		showControls, /* CALL_RELATED_IMPORT: Call 界面控制相关 */
+		TTSWorker /* CALL_RELATED_IMPORT: Call 功能的 TTS Worker */
 	} from '$lib/stores';
 
 	import {
@@ -27,7 +27,7 @@
 		createMessagesList,
 		extractCurlyBraceWords
 	} from '$lib/utils';
-	import { transcribeAudio } from '$lib/apis/audio';
+	import { transcribeAudio } from '$lib/apis/audio'; /* STT_RELATED_IMPORT: 语音转文字 API */
 	import { uploadFile } from '$lib/apis/files';
 	import { generateAutoCompletion } from '$lib/apis';
 	import { deleteFileById } from '$lib/apis/files';
@@ -35,7 +35,7 @@
 	import { WEBUI_BASE_URL, WEBUI_API_BASE_URL, PASTED_TEXT_CHARACTER_LIMIT } from '$lib/constants';
 
 	import InputMenu from './MessageInput/InputMenu.svelte';
-	import VoiceRecording from './MessageInput/VoiceRecording.svelte';
+	import VoiceRecording from './MessageInput/VoiceRecording.svelte'; /* STT_RELATED_IMPORT: 语音录制组件 */
 	import FilesOverlay from './MessageInput/FilesOverlay.svelte';
 	import Commands from './MessageInput/Commands.svelte';
 	import ToolServersModal from './ToolServersModal.svelte';
@@ -100,6 +100,7 @@
 		} else {
 			deepWebSearchEnabled = false;
 		}
+		console.log('_user.permissions.features:', $_user.permissions.features);
 	}
 	$: onChange({
 		prompt,
@@ -117,7 +118,7 @@
 	let showTools = false;
 
 	let loaded = false;
-	let recording = false;
+	let recording = false; /* STT_RELATED_VARIABLE: 语音录制状态变量 */
 
 	let isComposing = false;
 
@@ -676,28 +677,30 @@
 					/>
 
 					{#if recording}
+						<!-- STT_VOICE_RECORDING: 语音录制组件区域 -->
 						<VoiceRecording
 							bind:recording
 							onCancel={async () => {
-								recording = false;
+								recording = false; /* STT_RECORDING_STATE: 取消录制时重置状态 */
 
 								await tick();
 								document.getElementById('chat-input')?.focus();
 							}}
 							onConfirm={async (data) => {
 								const { text, filename } = data;
-								prompt = `${prompt}${text} `;
+								prompt = `${prompt}${text} `; /* STT_TEXT_PROCESSING: 将语音转换的文字添加到输入框 */
 
-								recording = false;
+								recording = false; /* STT_RECORDING_STATE: 确认录制后重置状态 */
 
 								await tick();
 								document.getElementById('chat-input')?.focus();
 
 								if ($settings?.speechAutoSend ?? false) {
-									dispatch('submit', prompt);
+									dispatch('submit', prompt); /* STT_AUTO_SEND: 语音自动发送功能 */
 								}
 							}}
 						/>
+						<!-- STT_VOICE_RECORDING: 语音录制组件区域结束 -->
 					{:else}
 						<form
 							class="w-full flex gap-1.5"
@@ -1450,7 +1453,7 @@
 													</Tooltip>
 												{/if} -->
 												<!-- MARK调试 -->
-												{#if $config?.features?.enable_knowledge_base && ($_user.role === 'admin' || $_user?.permissions?.features?.knowledge_base)}
+												{#if $config?.features?.enable_knowledge_base && ($_user?.role === 'admin' || $_user?.permissions?.features?.knowledge_base)}
 												<!-- {#if true} -->
 													<Tooltip content={$i18n.t('Search knowledge base')} placement="top">
 														<button
@@ -1478,156 +1481,160 @@
 														</button>
 													</Tooltip>
 												{/if}
+											{/if}
 
-												<!-- MARK 添加TAG -->
-												{#if $config?.features?.enable_deep_web_search && ($_user.role === 'admin' || $_user?.permissions?.features?.deep_web_search)}
-													<div class="relative">
-														<Tooltip content="深度网络搜索" placement="top">
-															<button
-																id="deep-web-search-button"
-																on:click|preventDefault={(e) => {
-																	showDeepWebSearchDropdown = !showDeepWebSearchDropdown;
-																	
-																	if (showDeepWebSearchDropdown) {
-																		// 在setTimeout之前获取button引用
-																		const button = e.currentTarget;
-																		
-																		// 等待下一个渲染周期，然后智能定位下拉菜单
-																		setTimeout(() => {
-																			const dropdown = document.getElementById('deep-web-search-dropdown');
-																			
-																			if (button && dropdown) {
-																				const buttonRect = button.getBoundingClientRect();
-																				
-																				// 检查是否有对话内容：如果有user-message元素，说明有对话，向上显示
-																				const hasMessages = document.querySelector('.user-message') !== null;
-																				const showAbove = hasMessages;
-																				
-																				
-																				
-																				if (showAbove) {
-																					// 向上显示（有对话内容时）
-																					dropdown.style.left = buttonRect.left + 'px';
-																					dropdown.style.top = (buttonRect.top - 120 - 8) + 'px';
-																					dropdown.style.transformOrigin = 'bottom left';
-																				} else {
-																					// 向下显示（没有对话内容时）- 添加适当的间距
-																					// dropdown.style.top = (buttonRect.bottom - 120 - 8) + 'px';
-																					// dropdown.style.transformOrigin = 'top left';
-																				}
-																			}
-																		}, 0);
-																	}
-																}}
-																type="button"
-																class="px-1.5 @sm:px-2.5 py-1.5 flex gap-1.5 items-center text-sm rounded-full font-medium transition-colors duration-300 focus:outline-hidden max-w-full overflow-hidden {deepWebSearchEnabled
-																	? 'bg-blue-100 dark:bg-blue-500/20 text-blue-500 dark:text-blue-400'
-																	: 'bg-transparent text-gray-600 dark:text-gray-300 border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 '}"
-															>
-																<svg
-																	xmlns="http://www.w3.org/2000/svg"
-																	viewBox="0 0 24 24"
-																	fill="none"
-																	stroke="currentColor"
-																	stroke-width="1.75"
-																	class="size-5"
-																>
-																	<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" />
-																	<path stroke-linecap="round" stroke-linejoin="round" d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z" />
-																</svg>
-																<span
-																	class="hidden @sm:block whitespace-nowrap overflow-hidden text-ellipsis translate-y-[0.5px] mr-0.5"
-																	>
-																	{#if deepWebSearchMode === 'auto'}
-																		联网搜索-自动
-																	{:else if deepWebSearchMode === 'on'}
-																		联网搜索-开
-																	{:else}
-																		联网搜索-关
-																	{/if}
-																</span>
-																<!-- 下拉箭头 -->
-																<svg class="size-3 ml-1" viewBox="0 0 12 12" fill="currentColor">
-																	<path d="M3.22 4.22a.75.75 0 0 1 1.06 0L6 5.94l1.72-1.72a.75.75 0 1 1 1.06 1.06L6.53 7.53a.75.75 0 0 1-1.06 0L3.22 5.28a.75.75 0 0 1 0-1.06z" />
-																</svg>
-															</button>
-														</Tooltip>
-														
-														<!-- 下拉菜单 -->
-														{#if showDeepWebSearchDropdown}
-															<div 
-																id="deep-web-search-dropdown" 
-																class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl"
-																style="position: fixed; z-index: 999999; min-width: 150px;"
-															>
-																<button
-																	type="button"
-																	class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 rounded-t-lg {deepWebSearchMode === 'auto' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}"
-																	on:click={() => {
-																		deepWebSearchMode = 'auto';
-																		showDeepWebSearchDropdown = false;
-																		deepWebSearchEnabled = true;
-																		
-																	}}
-																>
-																	联网搜索-自动
-																</button>
-																<button
-																	type="button"
-																	class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 {deepWebSearchMode === 'on' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}"
-																	on:click={() => {
-																		deepWebSearchMode = 'on';
-																		showDeepWebSearchDropdown = false;
-																		deepWebSearchEnabled = true;
-																	}}
-																>
-																	联网搜索-开
-																</button>
-																<button
-																	type="button"
-																	class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 rounded-b-lg {deepWebSearchMode === 'off' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}"
-																	on:click={() => {
-																		deepWebSearchMode = 'off';
-																		showDeepWebSearchDropdown = false;
-																		deepWebSearchEnabled = false;
-																	}}
-																>
-																	联网搜索-关
-																</button>
-															</div>
-														{/if}
-													</div>
-												{/if}	
-												<!-- MARK 添加TAG -->
-												{#if $config?.features?.enable_deep_research && ($_user.role === 'admin' || $_user?.permissions?.features?.deep_research)}
-													<Tooltip content={$i18n.t('Deep Research Mode')} placement="top">
+											<!-- MARK 添加TAG - 将深度网络搜索移出 $_user 检查 -->
+											{#if $config?.features?.enable_deep_web_search && (($_user?.role === 'admin') || ($_user?.permissions?.features?.deep_web_search))}
+												<div class="relative">
+													<Tooltip content="深度网络搜索" placement="top">
 														<button
-															on:click|preventDefault={() =>
-																(deepResearchEnabled = !deepResearchEnabled)}
+															id="deep-web-search-button"
+															on:click|preventDefault={(e) => {
+																showDeepWebSearchDropdown = !showDeepWebSearchDropdown;
+																
+																if (showDeepWebSearchDropdown) {
+																	// 在setTimeout之前获取button引用
+																	const button = e.currentTarget;
+																	
+																	// 等待下一个渲染周期，然后智能定位下拉菜单
+																	setTimeout(() => {
+																		const dropdown = document.getElementById('deep-web-search-dropdown');
+																		
+																		if (button && dropdown) {
+																			const buttonRect = button.getBoundingClientRect();
+																			
+																			// 检查是否有对话内容：如果有user-message元素，说明有对话，向上显示
+																			const hasMessages = document.querySelector('.user-message') !== null;
+																			const showAbove = hasMessages;
+																			
+																			
+																			
+																			if (showAbove) {
+																				// 向上显示（有对话内容时）
+																				dropdown.style.left = buttonRect.left + 'px';
+																				dropdown.style.top = (buttonRect.top - 120 - 8) + 'px';
+																				dropdown.style.transformOrigin = 'bottom left';
+																			} else {
+																				// 向下显示（没有对话内容时）- 添加适当的间距
+																				// dropdown.style.top = (buttonRect.bottom - 120 - 8) + 'px';
+																				// dropdown.style.transformOrigin = 'top left';
+																			}
+																		}
+																	}, 0);
+																}
+															}}
 															type="button"
-															class="px-1.5 @sm:px-2.5 py-1.5 flex gap-1.5 items-center text-sm rounded-full font-medium transition-colors duration-300 focus:outline-hidden max-w-full overflow-hidden {deepResearchEnabled
-																? 'bg-green-100 dark:bg-green-500/20 text-green-500 dark:text-green-400'
+															class="px-1.5 @sm:px-2.5 py-1.5 flex gap-1.5 items-center text-sm rounded-full font-medium transition-colors duration-300 focus:outline-hidden max-w-full overflow-hidden {deepWebSearchEnabled
+																? 'bg-blue-100 dark:bg-blue-500/20 text-blue-500 dark:text-blue-400'
 																: 'bg-transparent text-gray-600 dark:text-gray-300 border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 '}"
 														>
 															<svg
-																xmlns="http://www.w3.org/2000/svg" 
+																xmlns="http://www.w3.org/2000/svg"
 																viewBox="0 0 24 24"
 																fill="none"
 																stroke="currentColor"
 																stroke-width="1.75"
 																class="size-5"
 															>
-																<path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
-																<path stroke-linecap="round" stroke-linejoin="round" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-																<path stroke-linecap="round" stroke-linejoin="round" d="M15 13c-.13 0-.26-.05-.35-.15-.19-.19-.19-.51 0-.7l1.79-1.79c.19-.19.51-.19.7 0 .19.19.19.51 0 .7l-1.79 1.79c-.09.1-.22.15-.35.15z"/>
+																<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" />
+																<path stroke-linecap="round" stroke-linejoin="round" d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z" />
 															</svg>
 															<span
 																class="hidden @sm:block whitespace-nowrap overflow-hidden text-ellipsis translate-y-[0.5px] mr-0.5"
-																>{$i18n.t('Deep Research')}</span
-															>
+																>
+																{#if deepWebSearchMode === 'auto'}
+																	联网搜索-自动
+																{:else if deepWebSearchMode === 'on'}
+																	联网搜索-开
+																{:else}
+																	联网搜索-关
+																{/if}
+															</span>
+															<!-- 下拉箭头 -->
+															<svg class="size-3 ml-1" viewBox="0 0 12 12" fill="currentColor">
+																<path d="M3.22 4.22a.75.75 0 0 1 1.06 0L6 5.94l1.72-1.72a.75.75 0 1 1 1.06 1.06L6.53 7.53a.75.75 0 0 1-1.06 0L3.22 5.28a.75.75 0 0 1 0-1.06z" />
+															</svg>
 														</button>
 													</Tooltip>
-												{/if}
+													
+													<!-- 下拉菜单 -->
+													{#if showDeepWebSearchDropdown}
+														<div 
+															id="deep-web-search-dropdown" 
+															class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl"
+															style="position: fixed; z-index: 999999; min-width: 150px;"
+														>
+															<button
+																type="button"
+																class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 rounded-t-lg {deepWebSearchMode === 'auto' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}"
+																on:click={() => {
+																	deepWebSearchMode = 'auto';
+																	showDeepWebSearchDropdown = false;
+																	deepWebSearchEnabled = true;
+																	console.log('deepWebSearchEnabled', deepWebSearchEnabled);
+																	
+																}}
+															>
+																联网搜索-自动
+															</button>
+															<button
+																type="button"
+																class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 {deepWebSearchMode === 'on' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}"
+																on:click={() => {
+																	deepWebSearchMode = 'on';
+																	showDeepWebSearchDropdown = false;
+																	deepWebSearchEnabled = true;
+																	console.log('deepWebSearchEnabled', deepWebSearchEnabled);
+																}}
+															>
+																联网搜索-开
+															</button>
+															<button
+																type="button"
+																class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 rounded-b-lg {deepWebSearchMode === 'off' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}"
+																on:click={() => {
+																	deepWebSearchMode = 'off';
+																	showDeepWebSearchDropdown = false;
+																	deepWebSearchEnabled = false;
+																	console.log('deepWebSearchEnabled', deepWebSearchEnabled);
+																}}
+															>
+																联网搜索-关
+															</button>
+														</div>
+													{/if}
+												</div>
+											{/if}
+
+											<!-- MARK 添加TAG -->
+											{#if $_user && $config?.features?.enable_deep_research && ($_user.role === 'admin' || $_user?.permissions?.features?.deep_research)}
+												<Tooltip content={$i18n.t('Deep Research Mode')} placement="top">
+													<button
+														on:click|preventDefault={() =>
+															(deepResearchEnabled = !deepResearchEnabled)}
+														type="button"
+														class="px-1.5 @sm:px-2.5 py-1.5 flex gap-1.5 items-center text-sm rounded-full font-medium transition-colors duration-300 focus:outline-hidden max-w-full overflow-hidden {deepResearchEnabled
+															? 'bg-green-100 dark:bg-green-500/20 text-green-500 dark:text-green-400'
+															: 'bg-transparent text-gray-600 dark:text-gray-300 border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 '}"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg" 
+															viewBox="0 0 24 24"
+															fill="none"
+															stroke="currentColor"
+															stroke-width="1.75"
+															class="size-5"
+														>
+															<path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+															<path stroke-linecap="round" stroke-linejoin="round" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+															<path stroke-linecap="round" stroke-linejoin="round" d="M15 13c-.13 0-.26-.05-.35-.15-.19-.19-.19-.51 0-.7l1.79-1.79c.19-.19.51-.19.7 0 .19.19.19.51 0 .7l-1.79 1.79c-.09.1-.22.15-.35.15z"/>
+														</svg>
+														<span
+															class="hidden @sm:block whitespace-nowrap overflow-hidden text-ellipsis translate-y-[0.5px] mr-0.5"
+															>{$i18n.t('Deep Research')}</span
+														>
+													</button>
+												</Tooltip>
 											{/if}
 
 
@@ -1636,7 +1643,8 @@
 									</div>
 									
 
-									<div class="self-end flex space-x-1 mr-1 shrink-0">
+									<div class="self-end flex space-x-1 mr-1 shrink-0 min-w-0">
+										<!-- 语音录制按钮 - STT_RENDER_CONTROL -->
 										{#if (!history?.currentId || history.messages[history.currentId]?.done == true) && ($_user?.role === 'admin' || ($_user?.permissions?.chat?.stt ?? true))}
 											<Tooltip content={$i18n.t('Record voice')}>
 												<button
@@ -1644,9 +1652,10 @@
 													class=" text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200 transition rounded-full p-1.5 mr-0.5 self-center"
 													type="button"
 													on:click={async () => {
+														/* STT_MICROPHONE_ACCESS: 开始语音录制流程 */
 														try {
 															let stream = await navigator.mediaDevices
-																.getUserMedia({ audio: true })
+																.getUserMedia({ audio: true }) /* STT_MEDIA_PERMISSION: 请求麦克风权限 */
 																.catch(function (err) {
 																	toast.error(
 																		$i18n.t(
@@ -1660,7 +1669,7 @@
 																});
 
 															if (stream) {
-																recording = true;
+																recording = true; /* STT_RECORDING_START: 设置录制状态为 true */
 																const tracks = stream.getTracks();
 																tracks.forEach((track) => track.stop());
 															}
@@ -1668,6 +1677,7 @@
 														} catch {
 															toast.error($i18n.t('Permission denied when accessing microphone'));
 														}
+														/* STT_MICROPHONE_ACCESS: 语音录制流程结束 */
 													}}
 													aria-label="Voice Input"
 												>
@@ -1686,6 +1696,7 @@
 											</Tooltip>
 										{/if}
 
+										<!-- 停止按钮/通话按钮/发送按钮 -->
 										{#if (taskIds && taskIds.length > 0) || (history.currentId && history.messages[history.currentId]?.done != true)}
 											<div class=" flex items-center">
 												<Tooltip content={$i18n.t('Stop')}>
@@ -1710,6 +1721,7 @@
 													</button>
 												</Tooltip>
 											</div>
+										<!-- CALL_RENDER_CONTROL -->
 										{:else if prompt === '' && files.length === 0 && ($_user?.role === 'admin' || ($_user?.permissions?.chat?.call ?? true))}
 											<div class=" flex items-center">
 												<Tooltip content={$i18n.t('Call')}>
@@ -1724,6 +1736,7 @@
 															}
 
 															if ($config.audio.stt.engine === 'web') {
+																/* STT_CONFIG_CHECK: 检查 STT 引擎配置 */
 																toast.error(
 																	$i18n.t('Call feature is not supported when using Web STT engine')
 																);
@@ -1757,8 +1770,10 @@
 																	}
 																}
 
+																/* CALL_FEATURE_LOGIC: Call 功能核心逻辑开始 */
 																showCallOverlay.set(true);
 																showControls.set(true);
+																/* CALL_FEATURE_LOGIC: Call 功能核心逻辑结束 */
 															} catch (err) {
 																// If the user denies the permission or an error occurs, show an error message
 																toast.error(
@@ -1773,6 +1788,7 @@
 												</Tooltip>
 											</div>
 										{:else}
+											<!-- 发送按钮始终存在，确保右侧区域不为空 -->
 											<div class=" flex items-center">
 												<Tooltip content={$i18n.t('Send message')}>
 													<button
