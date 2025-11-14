@@ -123,6 +123,7 @@
 	let knowledgeBaseEnabled = true;
 	let deepWebSearchEnabled = false;
 	let deepResearchEnabled = false;
+	let drawUpEnabled = false;
 	let chat = null;
 	let tags = [];
 
@@ -1595,6 +1596,11 @@
 						($user.role in ['admin', 'user'] || $user?.permissions?.features?.deep_research)
 							? deepResearchEnabled
 							: false,
+					draw_up:
+						$config?.features?.enable_draw_up &&
+						($user.role in ['admin', 'user'] || $user?.permissions?.features?.draw_up)
+							? drawUpEnabled
+							: false,
 					web_search:
 						$config?.features?.enable_web_search &&
 						($user.role === 'admin' || $user?.permissions?.features?.web_search)
@@ -2052,6 +2058,7 @@
 								bind:knowledgeBaseEnabled
 								bind:deepWebSearchEnabled
 								bind:deepResearchEnabled
+								bind:drawUpEnabled
 								bind:webSearchEnabled
 								bind:atSelectedModel
 								transparentBackground={$settings?.backgroundImageUrl ?? false}
@@ -2109,6 +2116,7 @@
 								bind:knowledgeBaseEnabled
 								bind:deepWebSearchEnabled
 								bind:deepResearchEnabled
+								bind:drawUpEnabled
 								bind:webSearchEnabled
 								transparentBackground={$settings?.backgroundImageUrl ?? false}
 								{stopResponse}

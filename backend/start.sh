@@ -15,6 +15,7 @@ export CORS_ALLOW_ORIGIN='*'
 export ENABLE_CODE_EXECUTION=false
 export ENABLE_CODE_INTERPRETER=false
 export ENABLE_KNOWLEDGE_BASE=true
+export ENABLE_DRAW_UP=true
 # export CUSTOM_NAME="CSEI-GPT"
 export WEBUI_NAME="SE-GPT"
 

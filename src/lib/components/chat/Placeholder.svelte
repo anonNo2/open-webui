@@ -40,6 +40,7 @@
 	export let deepWebSearchEnabled = false;
 	export let deepResearchEnabled = false;
 	export let webSearchEnabled = false;
+	export let drawUpEnabled = false;
 
 	let models = [];
 
@@ -201,6 +202,7 @@
 					bind:knowledgeBaseEnabled
 					bind:deepWebSearchEnabled
 					bind:deepResearchEnabled
+					bind:drawUpEnabled
 					bind:webSearchEnabled
 					bind:atSelectedModel
 					{transparentBackground}

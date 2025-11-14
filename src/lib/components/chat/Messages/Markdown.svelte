@@ -30,6 +30,35 @@
 	marked.use(markedKatexExtension(options));
 	marked.use(markedExtension(options));
 
+	// 彻底禁用 marked 的删除线语法，保留所有 ~，并添加调试信息
+	marked.setOptions({ gfm: false });
+	marked.use({
+		extensions: [
+			{
+				name: 'strikethrough',
+				level: 'inline',
+				start(src) {
+					const match = src.match(/~+/);
+					if (match) {
+						console.log('[DEBUG] [CUSTOM] strikethrough start matched:', match[0], 'at', match.index, 'in', src);
+					}
+					return undefined; // 永远不匹配
+				},
+				tokenizer(src) {
+					const match = src.match(/~+/);
+					if (match) {
+						console.log('[DEBUG] [CUSTOM] strikethrough tokenizer matched:', match[0], 'in', src);
+					}
+					return undefined; // 永远不处理
+				},
+				renderer(token) {
+					console.log('[DEBUG] [CUSTOM] strikethrough renderer called:', token);
+					return token.raw;
+				}
+			}
+		]
+	});
+
 	$: (async () => {
 		if (content) {
 			tokens = marked.lexer(

@@ -882,6 +882,9 @@ USER_PERMISSIONS_FEATURES_DEEP_RESEARCH = (
     os.environ.get("USER_PERMISSIONS_FEATURES_DEEP_RESEARCH", "True").lower() == "true"
 )
 
+# MARK 添加出题模式
+USER_PERMISSIONS_FEATURES_DRAW_UP = os.environ.get("USER_PERMISSIONS_FEATURES_DRAW_UP", "True").lower() == "true"
+
 
 DEFAULT_USER_PERMISSIONS = {
     "workspace": {
@@ -905,6 +908,7 @@ DEFAULT_USER_PERMISSIONS = {
         "knowledge_base": USER_PERMISSIONS_FEATURES_KNOWLEDGE_BASE,
         "deep_web_search": USER_PERMISSIONS_FEATURES_DEEP_WEB_SEARCH,
         "deep_research": USER_PERMISSIONS_FEATURES_DEEP_RESEARCH,
+        "draw_up": USER_PERMISSIONS_FEATURES_DRAW_UP,
     },
 }
 
@@ -1347,6 +1351,12 @@ ENABLE_DEEP_RESEARCH = PersistentConfig(
     "ENABLE_DEEP_RESEARCH",
     "deep_research.enable",
     os.environ.get("ENABLE_DEEP_RESEARCH", "True").lower() == "true",
+)
+
+ENABLE_DRAW_UP = PersistentConfig(
+    "ENABLE_DRAW_UP",
+    "draw_up.enable",
+    os.environ.get("ENABLE_DRAW_UP", "True").lower() == "true",
 )
 
 

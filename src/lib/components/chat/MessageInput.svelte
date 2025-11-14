@@ -4,6 +4,8 @@
 	import { createPicker, getAuthToken } from '$lib/utils/google-drive-picker';
 	import { pickAndDownloadFile } from '$lib/utils/onedrive-file-picker';
 
+	import PencilSquare from '../icons/PencilSquare.svelte';
+
 	import { onMount, tick, getContext, createEventDispatcher, onDestroy } from 'svelte';
 	const dispatch = createEventDispatcher();
 
@@ -76,6 +78,7 @@
 	export let knowledgeBaseEnabled = false;
 	export let deepWebSearchEnabled = false;
 	export let deepResearchEnabled = false;
+	export let drawUpEnabled = false;
 	$: onChange({
 		prompt,
 		files,
@@ -85,7 +88,8 @@
 		codeInterpreterEnabled,
 		knowledgeBaseEnabled,
 		deepWebSearchEnabled,
-		deepResearchEnabled
+		deepResearchEnabled,
+		drawUpEnabled
 	});
 
 	let loaded = false;
@@ -355,17 +359,26 @@
 		{#if loaded && history && Object.keys(history.messages).length > 0}
 			<div class="flex justify-center my-4" style="z-index: 50; position: relative;">
 				<button
-					class="px-7 py-1.5 bg-blue-500 text-white rounded-full shadow hover:bg-blue-600 transition text-sm flex items-center gap-1.5"
+					class="flex items-center rounded-lg px-2 py-1 h-full text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 transition cursor-pointer"
 					type="button"
 					on:click={() => {
 						initNewChat();
 					}}
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-						<path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
-						<path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
-					</svg>
-					{$i18n.t('New Chat')}
+					<div class="self-center mx-1.5">
+								<img
+									crossorigin="anonymous"
+									src="{WEBUI_BASE_URL}/static/favicon.png"
+									class="size-5 -translate-x-1.5 rounded-full"
+									alt="logo"
+								/>
+					</div>
+					<div class="self-center font-medium text-sm text-gray-850 dark:text-white font-primary">
+						{$i18n.t('New Chat')}
+					</div>
+					<div class="ml-3">
+						<PencilSquare className="size-5" strokeWidth="2" />
+					</div>
 				</button>
 			</div>
 		{/if}
@@ -405,7 +418,7 @@
 				</div>
 				<!-- MARK 添加TAG -->
 				<div class="w-full relative">
-					{#if atSelectedModel !== undefined || selectedToolIds.length > 0 || webSearchEnabled || ($settings?.webSearch ?? false) === 'always' || imageGenerationEnabled || codeInterpreterEnabled || knowledgeBaseEnabled || deepWebSearchEnabled || deepResearchEnabled}
+					{#if atSelectedModel !== undefined || selectedToolIds.length > 0 || webSearchEnabled || ($settings?.webSearch ?? false) === 'always' || imageGenerationEnabled || codeInterpreterEnabled || knowledgeBaseEnabled || deepWebSearchEnabled || deepResearchEnabled || drawUpEnabled}
 						<div
 							class="px-3 pb-0.5 pt-1.5 text-left w-full flex flex-col absolute bottom-0 left-0 right-0 bg-linear-to-t from-white dark:from-gray-900 z-10"
 						>
@@ -534,6 +547,23 @@
 											</span>
 										</div>
 										<div class=" translate-y-[0.5px]">{$i18n.t('Deep Research Mode')}</div>
+									</div>
+								</div>
+							{/if}
+
+							<!-- MARK 添加TAG -->
+							{#if drawUpEnabled}
+								<div class="flex items-center justify-between w-full">
+									<div class="flex items-center gap-2.5 text-sm dark:text-gray-500">
+										<div class="pl-1">
+											<span class="relative flex size-2">
+												<span
+													class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"
+												/>
+												<span class="relative inline-flex rounded-full size-2 bg-teal-500" />
+											</span>
+										</div>
+										<div class=" translate-y-[0.5px]">{$i18n.t('Draw Up Mode')}</div>
 									</div>
 								</div>
 							{/if}
@@ -1299,11 +1329,15 @@
 												{/if}
 												<!-- MARK调试 -->
 												{#if $config?.features?.enable_knowledge_base && ($_user.role === 'admin' || $_user?.permissions?.features?.knowledge_base)}
-												<!-- {#if true} -->
 													<Tooltip content={$i18n.t('Search knowledge base')} placement="top">
 														<button
-															on:click|preventDefault={() =>
-																(knowledgeBaseEnabled = !knowledgeBaseEnabled)}
+															on:click|preventDefault={() => {
+																knowledgeBaseEnabled = !knowledgeBaseEnabled;
+																// 互斥逻辑
+																if (knowledgeBaseEnabled) {
+																	drawUpEnabled = false;
+																}
+															}}
 															type="button"
 															class="px-1.5 @sm:px-2.5 py-1.5 flex gap-1.5 items-center text-sm rounded-full font-medium transition-colors duration-300 focus:outline-hidden max-w-full overflow-hidden {knowledgeBaseEnabled
 																? 'bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400'
@@ -1331,8 +1365,13 @@
 												{#if $config?.features?.enable_deep_web_search && ($_user.role === 'admin' || $_user?.permissions?.features?.deep_web_search)}
 													<Tooltip content={$i18n.t('Search the deep web')} placement="top">
 														<button
-															on:click|preventDefault={() =>
-																(deepWebSearchEnabled = !deepWebSearchEnabled)}
+															on:click|preventDefault={() => {
+																deepWebSearchEnabled = !deepWebSearchEnabled;
+																// 互斥逻辑
+																if (deepWebSearchEnabled) {
+																	drawUpEnabled = false;
+																}
+															}}
 															type="button"
 															class="px-1.5 @sm:px-2.5 py-1.5 flex gap-1.5 items-center text-sm rounded-full font-medium transition-colors duration-300 focus:outline-hidden max-w-full overflow-hidden {deepWebSearchEnabled
 																? 'bg-blue-100 dark:bg-blue-500/20 text-blue-500 dark:text-blue-400'
@@ -1360,8 +1399,13 @@
 												{#if $config?.features?.enable_deep_research && ($_user.role === 'admin' || $_user?.permissions?.features?.deep_research)}
 													<Tooltip content={$i18n.t('Deep Research Mode')} placement="top">
 														<button
-															on:click|preventDefault={() =>
-																(deepResearchEnabled = !deepResearchEnabled)}
+															on:click|preventDefault={() => {
+																deepResearchEnabled = !deepResearchEnabled;
+																// 互斥逻辑
+																if (deepResearchEnabled) {
+																	drawUpEnabled = false;
+																}
+															}}
 															type="button"
 															class="px-1.5 @sm:px-2.5 py-1.5 flex gap-1.5 items-center text-sm rounded-full font-medium transition-colors duration-300 focus:outline-hidden max-w-full overflow-hidden {deepResearchEnabled
 																? 'bg-green-100 dark:bg-green-500/20 text-green-500 dark:text-green-400'
@@ -1382,6 +1426,43 @@
 															<span
 																class="hidden @sm:block whitespace-nowrap overflow-hidden text-ellipsis translate-y-[0.5px] mr-0.5"
 																>{$i18n.t('Deep Research')}</span
+															>
+														</button>
+													</Tooltip>
+												{/if}
+												<!-- MARK 添加TAG -->
+												{#if $config?.features?.enable_draw_up && ($_user.role === 'admin' || $_user?.permissions?.features?.draw_up)}
+													<Tooltip content={$i18n.t('Draw Up Mode')} placement="top">
+														<button
+															on:click|preventDefault={() => {
+																drawUpEnabled = !drawUpEnabled;
+																// 互斥逻辑
+																if (drawUpEnabled) {
+																	knowledgeBaseEnabled = false;
+																	deepWebSearchEnabled = false;
+																	deepResearchEnabled = false;
+																}
+															}}
+															type="button"
+															class="px-1.5 @sm:px-2.5 py-1.5 flex gap-1.5 items-center text-sm rounded-full font-medium transition-colors duration-300 focus:outline-hidden max-w-full overflow-hidden {drawUpEnabled
+																? 'bg-teal-100 dark:bg-teal-500/20 text-teal-500 dark:text-teal-400'
+																: 'bg-transparent text-gray-600 dark:text-gray-300 border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 '}"
+														>
+															<svg
+																xmlns="http://www.w3.org/2000/svg"
+																viewBox="0 0 24 24"
+																fill="none"
+																stroke="currentColor"
+																stroke-width="1.75"
+																class="size-5"
+															>
+																<!-- 替换为铅笔图标路径 -->
+																<path stroke-linecap="round" stroke-linejoin="round" d="M16.862 5.487a2.25 2.25 0 1 1 3.182 3.182L8.25 20.463l-4.182.545.545-4.182 12.249-12.34z" />
+																<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 7.125l1.125 1.125" />
+															</svg>
+															<span
+																class="hidden @sm:block whitespace-nowrap overflow-hidden text-ellipsis translate-y-[0.5px] mr-0.5"
+																>{$i18n.t('Draw Up')}</span
 															>
 														</button>
 													</Tooltip>

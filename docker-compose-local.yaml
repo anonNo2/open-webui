@@ -1,0 +1,15 @@
+services:
+  open-webui:
+    container_name: csei-open-webui
+    image: sribd-common/open-webui:main
+    environment:
+     HF_ENDPOINT: https://hf-mirror.com
+    volumes:
+      - ./backend:/app/backend
+      - ./build:/app/build
+      - ./CHANGELOG.md:/app/CHANGELOG.md
+      - /data/yuhao/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2:/root/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2
+    ports:
+      - "18080:18080"
+    command: bash /app/backend/start.sh
+    restart: unless-stopped

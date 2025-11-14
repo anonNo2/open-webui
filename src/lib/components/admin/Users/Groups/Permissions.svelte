@@ -27,7 +27,8 @@
 			code_interpreter: true,
 			knowledge_base: true,
 			deep_web_search: true,
-			deep_research: true
+			deep_research: true,
+			draw_up: true
 		}
 	};
 
@@ -194,6 +195,14 @@
 			</div>
 
 			<Switch bind:state={permissions.features.deep_research} />
+		</div>
+
+		<div class="  flex w-full justify-between my-2 pr-2">
+			<div class=" self-center text-xs font-medium">
+				{$i18n.t('Draw Up')}
+			</div>
+
+			<Switch bind:state={permissions.features.draw_up} />
 		</div>
 	</div>
 </div>

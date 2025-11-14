@@ -119,6 +119,7 @@ from open_webui.config import (
     ENABLE_KNOWLEDGE_BASE,
     ENABLE_DEEP_WEB_SEARCH,
     ENABLE_DEEP_RESEARCH,
+    ENABLE_DRAW_UP,
     CODE_INTERPRETER_ENGINE,
     CODE_INTERPRETER_PROMPT_TEMPLATE,
     CODE_INTERPRETER_JUPYTER_URL,
@@ -686,6 +687,7 @@ app.state.config.ENABLE_KNOWLEDGE_BASE = ENABLE_KNOWLEDGE_BASE
 # MARK 添加TAG
 app.state.config.ENABLE_DEEP_WEB_SEARCH = ENABLE_DEEP_WEB_SEARCH
 app.state.config.ENABLE_DEEP_RESEARCH = ENABLE_DEEP_RESEARCH
+app.state.config.ENABLE_DRAW_UP = ENABLE_DRAW_UP
 app.state.config.CODE_INTERPRETER_ENGINE = CODE_INTERPRETER_ENGINE
 app.state.config.CODE_INTERPRETER_PROMPT_TEMPLATE = CODE_INTERPRETER_PROMPT_TEMPLATE
 
@@ -1162,6 +1164,7 @@ async def get_app_config(request: Request):
                     "enable_knowledge_base": app.state.config.ENABLE_KNOWLEDGE_BASE,
                     "enable_deep_web_search": app.state.config.ENABLE_DEEP_WEB_SEARCH,
                     "enable_deep_research": app.state.config.ENABLE_DEEP_RESEARCH,
+                    "enable_draw_up": app.state.config.ENABLE_DRAW_UP,
                     "enable_image_generation": app.state.config.ENABLE_IMAGE_GENERATION,
                     "enable_autocomplete_generation": app.state.config.ENABLE_AUTOCOMPLETE_GENERATION,
                     "enable_community_sharing": app.state.config.ENABLE_COMMUNITY_SHARING,
